@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+  <android.support.v7.widget.RecyclerView
+      android:id="@+id/recyclerView"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1"
+      />
+
+
+  <LinearLayout android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:padding="8dp">
+
+    <EditText
+        android:id="@+id/cid"
+        android:layout_width="40dp"
+        android:layout_height="wrap_content"
+        android:hint="id"
+        />
+
+    <EditText
+        android:id="@+id/firstname"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:hint="firstname"
+        />
+
+    <EditText
+        android:id="@+id/lastname"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:hint="lastname"
+        />
+
+    <Button
+        android:id="@+id/insert"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add"
+        />
+
+  </LinearLayout>
+
+
+</LinearLayout>

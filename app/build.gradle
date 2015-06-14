@@ -1,0 +1,57 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+
+android {
+  compileSdkVersion 22
+  buildToolsVersion "22.0.1"
+
+  defaultConfig {
+    applicationId "com.hannesdorfmann.sqlbrite.dao.sample"
+    minSdkVersion 15
+    targetSdkVersion 22
+    versionCode 1
+    versionName "1.0"
+  }
+  buildTypes {
+    release {
+      minifyEnabled false
+      proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+  }
+}
+
+def annotatedAdapter = '1.1.0'
+def supportLib = '22.2.0'
+def mosby = '1.1.0'
+
+dependencies {
+  compile fileTree(dir: 'libs', include: ['*.jar'])
+
+  // Support libs
+  compile 'com.android.support:appcompat-v7:'+supportLib
+  compile 'com.android.support:recyclerview-v7:'+supportLib
+  compile 'com.android.support:cardview-v7:'+supportLib
+
+  compile project(':dao')
+
+
+  // Frameworks
+  compile 'com.hannesdorfmann.mosby:viewstate-dagger1:'+mosby
+  compile 'com.hannesdorfmann.mosby:rx:'+mosby
+  apt 'frankiesardo:icepick-processor:3.0.2'
+  apt 'com.hannesdorfmann.fragmentargs:processor:2.1.0'
+  apt 'com.squareup.dagger:dagger-compiler:1.2.2'
+  apt 'com.hannesdorfmann.annotatedadapter:processor:' + annotatedAdapter
+  compile 'com.hannesdorfmann.annotatedadapter:annotation:' + annotatedAdapter
+  compile 'com.hannesdorfmann.annotatedadapter:support-recyclerview:' + annotatedAdapter
+  compile 'de.greenrobot:eventbus:2.4.0'
+
+
+
+
+  // UI libs
+  compile 'com.github.castorflex.smoothprogressbar:library-circular:1.1.0'
+  compile 'de.hdodenhof:circleimageview:1.3.0'
+  compile 'com.squareup.picasso:picasso:2.5.2'
+
+}
