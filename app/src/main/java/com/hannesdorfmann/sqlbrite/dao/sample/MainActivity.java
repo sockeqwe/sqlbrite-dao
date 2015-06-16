@@ -8,7 +8,7 @@ import android.widget.Toast;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import com.hannesdorfmann.mosby.dagger1.Dagger1MosbyActivity;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.Customer;
+import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.Customer;
 import com.hannesdorfmann.sqlbrite.dao.sample.model.CustomerDao;
 import java.util.List;
 import javax.inject.Inject;

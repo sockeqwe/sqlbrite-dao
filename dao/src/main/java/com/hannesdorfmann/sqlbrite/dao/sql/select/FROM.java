@@ -39,6 +39,19 @@ public class FROM extends SqlCursorCompileableChildNode implements SqlCompileabl
     return new WHERE(this, condition);
   }
 
+
+  // TODO find a better String formater lib
+  /*
+   * Adds a SQL WHERE clause
+   * @param condition The where clause that will be formatted with String.forma() so you can use %s if you want to
+   * @param args The argument used in String.format() to format the condition
+   * @return WHERE
+
+  public WHERE WHERE(String condition, Object ... args){
+    return new WHERE(this, String.format(condition, args));
+  }
+  */
+
   /**
    * Adds a SQL ORDER BY
    *

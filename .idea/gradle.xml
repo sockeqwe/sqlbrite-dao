@@ -11,6 +11,8 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/dao" />
+            <option value="$PROJECT_DIR$/objectmapper-annotation" />
+            <option value="$PROJECT_DIR$/objectmapper-processor" />
           </set>
         </option>
       </GradleProjectSettings>

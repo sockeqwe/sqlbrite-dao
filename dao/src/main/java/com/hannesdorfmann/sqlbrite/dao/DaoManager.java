@@ -14,7 +14,6 @@ import java.util.Set;
  * {@link Dao#createTable(SQLiteDatabase)} and
  * {@link Dao#onUpgrade(SQLiteDatabase, int, int)}. It also injects the
  * {@link SQLiteOpenHelper} to the dao by calling
- * {@link Dao#setSqliteOpenHelper(SQLiteOpenHelper)}
  *
  * @author Hannes Dorfmann
  */

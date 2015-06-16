@@ -1,0 +1,11 @@
+apply plugin: 'java'
+apply from: '../maven-push-java-lib.gradle'
+
+dependencies {
+  compile project(':objectmapper-annotation')
+
+  compile 'com.google.auto.service:auto-service:1.0-rc2'
+  compile 'com.squareup:javapoet:1.1.0'
+
+  compile 'com.google.android:android:4.1.1.4'
+}

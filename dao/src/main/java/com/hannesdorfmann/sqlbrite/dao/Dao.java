@@ -83,6 +83,7 @@ public abstract class Dao {
    */
   protected Observable<SqlBrite.Query> query(SqlFinishedStatement statement,
       boolean triggerAffectedTableUpdates, String... args) {
+
     SqlCompileable.CompileableStatement compileableStatement = statement.asCompileableStatement();
     Set<String> affectedTables =
         compileableStatement.tables == null ? new HashSet<String>() : compileableStatement.tables;
@@ -162,6 +163,33 @@ public abstract class Dao {
       @Override public Observable<Integer> call() {
         return Observable.just(
             sqlBrite.update(table, values, conflictAlgorithm, whereClause, whereArgs));
+      }
+    });
+  }
+
+  /**
+   * Deletes all rows from a table
+   *
+   * @param table The table to delete
+   * @return Observable with the number of deleted rows
+   */
+  protected Observable<Integer> delete(@NonNull final String table) {
+    return delete(table, null);
+  }
+
+  /**
+   * Delete data from a table
+   *
+   * @param table The table name
+   * @param whereClause the where clause
+   * @param whereArgs the where clause arguments
+   * @return Observable with the number of deleted rows
+   */
+  protected Observable<Integer> delete(@NonNull final String table,
+      @Nullable final String whereClause, @Nullable final String... whereArgs) {
+    return Observable.defer(new Func0<Observable<Integer>>() {
+      @Override public Observable<Integer> call() {
+        return Observable.just(sqlBrite.delete(table, whereClause, whereArgs));
       }
     });
   }

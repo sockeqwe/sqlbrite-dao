@@ -1,19 +1,24 @@
-package com.hannesdorfmann.sqlbrite.dao.sample.model;
+package com.hannesdorfmann.sqlbrite.dao.sample.model.customer;
+
+import com.hannesdorfmann.sqlbrite.dao.sample.model.Person;
+import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 
 /**
  * @author Hannes Dorfmann
  */
-public class Customer {
+public class Customer extends Person {
 
-  public static final String TABLE_NAME="Customer";
-  public static final String COL_ID = "id";
+  public static final String TABLE_NAME = "Customer";
   public static final String COL_FIRSTNAME = "firstname";
   public static final String COL_LASTNAME = "lastname";
 
 
-  long id;
-  String firstname;
-  String lastname;
+  @Column(COL_FIRSTNAME) String firstname;
+
+  @Column(COL_LASTNAME) String lastname;
+
+  public Customer() {
+  }
 
   public Customer(long id, String firstname, String lastname) {
     this.id = id;
@@ -21,9 +26,6 @@ public class Customer {
     this.lastname = lastname;
   }
 
-  public long getId() {
-    return id;
-  }
 
   public String getFirstname() {
     return firstname;

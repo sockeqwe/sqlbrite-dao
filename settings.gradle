@@ -1,1 +1,1 @@
-include ':app', ':dao'
+include  ':app', ':dao', ':objectmapper-annotation', ':objectmapper-processor'
