@@ -3,6 +3,7 @@ package com.hannesdorfmann.sqlbrite.objectmapper.processor;
 import android.database.Cursor;
 import com.google.auto.service.AutoService;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
+import com.hannesdorfmann.sqlbrite.objectmapper.annotation.ObjectMappable;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
@@ -30,13 +31,13 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
-@AutoService(Processor.class) public class ColumnProcessor extends AbstractProcessor {
+@AutoService(Processor.class) public class ObjectMappableProcessor extends AbstractProcessor {
 
   private Elements elements;
   private Types types;
   private Messager messager;
   private Filer filer;
-  private Set<ColumnAnnotatedClass> annotatedClasses = new HashSet<>();
+  private Set<ObjectMappableAnnotatedClass> annotatedClasses = new HashSet<>();
 
   @Override public synchronized void init(ProcessingEnvironment processingEnv) {
     super.init(processingEnv);
@@ -74,17 +75,21 @@ import javax.tools.Diagnostic;
   }
 
   /**
-   * Checks if a element is of kind FIELD or METHOD
+   * Check the Element if it's a class and returns the corresponding TypeElement
    *
-   * @param e Element to check
-   * @throws ProcessingException if not a Field or Method
+   * @param e The element to check
+   * @return The {@link TypeElement} representing the annotated class
+   * @throws ProcessingException If element is not a CLASS
    */
-  private void isFieldOrMethod(Element e) throws ProcessingException {
-    if (e.getKind() != ElementKind.FIELD && e.getKind() != ElementKind.METHOD) {
+  private TypeElement checkAndGetClass(Element e) throws ProcessingException {
+
+    if (e.getKind() != ElementKind.CLASS) {
       throw new ProcessingException(e,
-          "Only Fields or Methods can be annotated with %s but %s is of kind %s",
-          Column.class.getSimpleName(), e.getSimpleName().toString(), e.getKind().toString());
+          "%s is annotated with @%s but only classes can be annotated with this annotation",
+          e.toString(), ObjectMappable.class.getSimpleName());
     }
+
+    return (TypeElement) e;
   }
 
   @Override
@@ -93,18 +98,17 @@ import javax.tools.Diagnostic;
     try {
 
       // Collect all annotated classes
-      for (Element e : roundEnv.getElementsAnnotatedWith(Column.class)) {
+      for (Element e : roundEnv.getElementsAnnotatedWith(ObjectMappable.class)) {
 
-        isFieldOrMethod(e);
-        TypeElement surroundingClass = getSurroundingClass(e);
+        TypeElement classElement = checkAndGetClass(e);
 
         // Skip abstract classes
-        if (surroundingClass.getModifiers().contains(Modifier.ABSTRACT)) {
+        if (e.getModifiers().contains(Modifier.ABSTRACT)) {
           continue;
         }
 
         // Check if class is already added to the annotated classes
-        ColumnAnnotatedClass annotatedClass = new ColumnAnnotatedClass(surroundingClass);
+        ObjectMappableAnnotatedClass annotatedClass = new ObjectMappableAnnotatedClass(classElement);
         if (annotatedClasses.contains(annotatedClass)) {
           continue;
         }
@@ -133,7 +137,7 @@ import javax.tools.Diagnostic;
    */
   private void generateCode() throws IOException {
 
-    for (ColumnAnnotatedClass clazz : annotatedClasses) {
+    for (ObjectMappableAnnotatedClass clazz : annotatedClasses) {
 
       PackageElement pkg = elements.getPackageOf(clazz.getElement());
       String packageName = pkg.isUnnamed() ? "" : pkg.getQualifiedName().toString();
@@ -159,13 +163,13 @@ import javax.tools.Diagnostic;
 
   /**
    * Generates the method to create retrieve a List of items from cursor that only takes one cursor
-   * as parameter and internally calls the method generate by {@link #generateListMethod(ColumnAnnotatedClass)}
+   * as parameter and internally calls the method generate by {@link #generateListMethod(ObjectMappableAnnotatedClass)}
    * with true as throwOnIndexNotFound parameter
    *
-   * @param clazz {@link ColumnAnnotatedClass}
+   * @param clazz {@link ObjectMappableAnnotatedClass}
    * @return The MethodSpec
    */
-  private MethodSpec generateSimpleListMethod(ColumnAnnotatedClass clazz) {
+  private MethodSpec generateSimpleListMethod(ObjectMappableAnnotatedClass clazz) {
 
     String cursorVarName = "cursor";
     ClassName list = ClassName.get("java.util", "List");
@@ -193,10 +197,10 @@ import javax.tools.Diagnostic;
    * Generates the method that takes a cursor and a boolean flag as parameter and returns a list of
    * Items
    *
-   * @param clazz The {@link ColumnAnnotatedClass}
+   * @param clazz The {@link ObjectMappableAnnotatedClass}
    * @return The MethodSpec
    */
-  private MethodSpec generateListMethod(ColumnAnnotatedClass clazz) {
+  private MethodSpec generateListMethod(ObjectMappableAnnotatedClass clazz) {
 
     String listVarName = "list";
     String objectVarName = "item";
@@ -263,13 +267,13 @@ import javax.tools.Diagnostic;
 
   /**
    * Generates the method to create retrieve a List of items from cursor that only takes one cursor
-   * as parameter and internally calls the method generate by {@link #generateListMethod(ColumnAnnotatedClass)}
+   * as parameter and internally calls the method generate by {@link #generateListMethod(ObjectMappableAnnotatedClass)}
    * with true as throwOnIndexNotFound parameter
    *
-   * @param clazz {@link ColumnAnnotatedClass}
+   * @param clazz {@link ObjectMappableAnnotatedClass}
    * @return The MethodSpec
    */
-  private MethodSpec generateSimpleSingleMethod(ColumnAnnotatedClass clazz) {
+  private MethodSpec generateSimpleSingleMethod(ObjectMappableAnnotatedClass clazz) {
 
     String cursorVarName = "cursor";
     TypeName elementType = ClassName.get(clazz.getElement().asType());
@@ -293,10 +297,10 @@ import javax.tools.Diagnostic;
   /**
    * Generates the method that fetches only one single Item (the first) from cursor
    *
-   * @param clazz The {@link ColumnAnnotatedClass}
+   * @param clazz The {@link ObjectMappableAnnotatedClass}
    * @return MethodSpec
    */
-  private MethodSpec generateSingleMethod(ColumnAnnotatedClass clazz) {
+  private MethodSpec generateSingleMethod(ObjectMappableAnnotatedClass clazz) {
 
     String objectVarName = "item";
     String cursorVarName = "cursor";
@@ -315,7 +319,7 @@ import javax.tools.Diagnostic;
         .addJavadoc("@return The fetched item from Cursor or <code>null</code> if cursor is empty")
         */.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .addParameter(Cursor.class, cursorVarName)
-        .addParameter(Boolean.class, throwOnIndexNotFoundVarName)
+        .addParameter(boolean.class, throwOnIndexNotFoundVarName)
         .returns(elementType)
         .beginControlFlow("try")
         .beginControlFlow("if ($L == null || $L.getCount() == 0 || !$L.moveToFirst()) ",

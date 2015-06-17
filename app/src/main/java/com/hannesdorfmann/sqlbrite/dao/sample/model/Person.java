@@ -1,11 +1,13 @@
 package com.hannesdorfmann.sqlbrite.dao.sample.model;
 
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
+import com.hannesdorfmann.sqlbrite.objectmapper.annotation.ObjectMappable;
 
 /**
  * @author Hannes Dorfmann
  */
-public class Person {
+@ObjectMappable
+public abstract class Person {
 
   public static final String COL_ID = "id";
 

@@ -2,10 +2,12 @@ package com.hannesdorfmann.sqlbrite.dao.sample.model.customer;
 
 import com.hannesdorfmann.sqlbrite.dao.sample.model.Person;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
+import com.hannesdorfmann.sqlbrite.objectmapper.annotation.ObjectMappable;
 
 /**
  * @author Hannes Dorfmann
  */
+@ObjectMappable
 public class Customer extends Person {
 
   public static final String TABLE_NAME = "Customer";

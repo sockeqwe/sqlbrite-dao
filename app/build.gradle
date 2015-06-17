@@ -23,7 +23,7 @@ android {
 def annotatedAdapter = '1.1.0'
 def supportLib = '22.2.0'
 def mosby = '1.1.0'
-def mapperVersion = '0.1.6-SNAPSHOT'
+def mapperVersion = '0.1.8-SNAPSHOT'
 
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -35,8 +35,8 @@ dependencies {
 
   compile project(':dao')
 
-  compile 'com.hannesdorfmann.sqlbrite:annotations:'+mapperVersion
   apt 'com.hannesdorfmann.sqlbrite:object-mapper:'+mapperVersion
+  compile 'com.hannesdorfmann.sqlbrite:annotations:'+mapperVersion
 
 
 

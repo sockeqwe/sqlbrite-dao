@@ -21,12 +21,12 @@ import javax.lang.model.util.Types;
  *
  * @author Hannes Dorfmann
  */
-public class ColumnAnnotatedClass {
+public class ObjectMappableAnnotatedClass {
 
   private TypeElement typeElement;
   private Map<String, ColumnAnnotateable> fieldsMap = new HashMap<>();
 
-  public ColumnAnnotatedClass(TypeElement typeElement) throws ProcessingException {
+  public ObjectMappableAnnotatedClass(TypeElement typeElement) throws ProcessingException {
     this.typeElement = typeElement;
 
     // Visibility
@@ -75,8 +75,11 @@ public class ColumnAnnotatedClass {
 
       // Scan fields
       for (Element e : currentClass.getEnclosedElements()) {
-        if (e.getKind() == ElementKind.FIELD
-            && (annotation = e.getAnnotation(Column.class)) != null) {
+
+        annotation = e.getAnnotation(Column.class);
+
+        if (e.getKind() == ElementKind.FIELD && annotation != null) {
+
           ColumnAnnotatedField field = new ColumnAnnotatedField((VariableElement) e, annotation);
 
           // Check field visibility of super class field
@@ -86,10 +89,10 @@ public class ColumnAnnotatedClass {
 
             superClassPackage = elementUtils.getPackageOf(currentClass);
 
-            if ((superClassPackage != null && originPackage == null)
-                || (superClassPackage == null && originPackage != null)
-                || (superClassPackage != null && !superClassPackage.equals(originPackage))
-                || (originPackage != null && !originPackage.equals(superClassPackage))) {
+            if ((superClassPackage != null && originPackage == null) || (superClassPackage == null
+                && originPackage != null) || (superClassPackage != null
+                && !superClassPackage.equals(originPackage)) || (originPackage != null
+                && !originPackage.equals(superClassPackage))) {
 
               throw new ProcessingException(e,
                   "The field %s in class %s can not be accessed from ObjectMapper because of "
@@ -116,8 +119,7 @@ public class ColumnAnnotatedClass {
           fieldsMap.put(field.getColumnName(), field);
         }
         // Check methods
-        else if (e.getKind() == ElementKind.METHOD
-            && (annotation = e.getAnnotation(Column.class)) != null) {
+        else if (e.getKind() == ElementKind.METHOD && annotation != null) {
 
           ColumnAnnotatedMethod method =
               new ColumnAnnotatedMethod((ExecutableElement) e, annotation);
@@ -133,6 +135,11 @@ public class ColumnAnnotatedClass {
           }
 
           fieldsMap.put(method.getColumnName(), method);
+        } else if (annotation != null) {
+          throw new ProcessingException(e,
+              "%s is of type %s and annotated with @%s, but only Fields or setter Methods can be annotated with @%s",
+              e.getSimpleName(), e.getKind().toString(), Column.class.getSimpleName(),
+              Column.class.getSimpleName());
         }
       }
 
@@ -145,7 +152,7 @@ public class ColumnAnnotatedClass {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    ColumnAnnotatedClass that = (ColumnAnnotatedClass) o;
+    ObjectMappableAnnotatedClass that = (ObjectMappableAnnotatedClass) o;
 
     return typeElement.equals(that.typeElement);
   }
