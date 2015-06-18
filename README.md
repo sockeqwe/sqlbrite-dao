@@ -229,4 +229,4 @@ compile 'com.hannesdorfmann.sqlbrite:annotations:xxx'
 apt 'com.hannesdorfmann.sqlbrite:object-mapper:xxx'
 ```
 To run annotation processing you have to use [apt](https://bitbucket.org/hvisser/android-apt).
-Please note that DAO and Object-Mapper are independent. You can choose whether you want to use both or not. You could also use Object-Mapper for your database without using SQLBrite at all.
+Please note that DAO and Object-Mapper are independent. You can choose whether you want to use both or not. You could also use Object-Mapper without using SQLBrite at all (since it only a takes `Cursor` and fills your annotated model object with data).
