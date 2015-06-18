@@ -16,8 +16,13 @@ import rx.functions.Func1;
 public class CustomerDao extends Dao {
 
   @Override public void createTable(SQLiteDatabase database) {
-    CREATE_TABLE(Customer.TABLE_NAME, Customer.COL_ID + " INTEGER PRIMARY KEY NOT NULL",
-        Customer.COL_FIRSTNAME + " TEXT", Customer.COL_LASTNAME + " TEXT").execute(database);
+
+    CREATE_TABLE(Customer.TABLE_NAME,
+        Customer.COL_ID + " INTEGER PRIMARY KEY NOT NULL",
+        Customer.COL_FIRSTNAME + " TEXT",
+        Customer.COL_LASTNAME + " TEXT")
+        .execute(database);
+
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
