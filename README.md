@@ -92,10 +92,10 @@ public final class CustomerMapper {
 }
 ```
 
-So basically it generates code for iterating over a `Cursor` (cursor gets closed internally) and retrieve fetch data by calling `cursor.getString(index)` and so on.
+So basically it generates code for iterating over a `Cursor` (cursor gets closed internally and resources released) and retrieve fetch data by calling `cursor.getString(index)` and so on.
 
 ```java
-Cursor c = ... ; // Some SQL SELECT statetment
+Cursor c = ... ; // Some SQL SELECT statement
 
 List<Customer> customers = CustomerMapper.list(cursor);
 ```
@@ -106,7 +106,7 @@ ContentValues cv = CustomerMapper.contentValues()
                         .id(1)
                         .firstname("Hannes")
                         .lastname("Dorfmann")
-                        .build;
+                        .build();
 ```
 
 The supported types for `@Column` are:
@@ -117,7 +117,7 @@ The supported types for `@Column` are:
  - float
  - double
  - byte[]
- - java.util.Date (mapped to long internatlly, time in milli seconds)
+ - java.util.Date (mapped to long internally, time in milli seconds)
 
 
 ## DAO
@@ -186,7 +186,7 @@ public class CustomerDao extends Dao {
     }
 
 
-    public Observable<Long> insert(int id, String firstname, String lastname) {
+    public Observable<Long> addCustomer(int id, String firstname, String lastname) {
       ContentValues values = CustomerMapper.contentValues()
                              .id(id)
                              .firstname(firstname)
@@ -213,4 +213,4 @@ Please note that adding DAO's dynamically (later) is not possible. You have to i
 
 To sum it up:
  - A `DaoManager` is representing the whole database file and basically is a `SQLiteOpenHelper` and manages `SqlBrite` instance for you.
- - A `Dao` is representing a table of a database.
+ - A `Dao` is representing a table of a database and provides public API like `getCustomers()` or `addCustomer()` to query and manipulate the data of the table.
