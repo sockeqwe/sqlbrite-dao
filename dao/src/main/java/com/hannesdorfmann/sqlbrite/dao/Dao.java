@@ -19,6 +19,7 @@ import com.hannesdorfmann.sqlbrite.dao.sql.view.DROP_VIEW_IF_EXISTS;
 import com.squareup.sqlbrite.SqlBrite;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import rx.Observable;
 import rx.functions.Func0;
 
@@ -61,6 +62,28 @@ public abstract class Dao {
   }
 
   /**
+   * Calls {@link SqlBrite#yieldIfContendedSafely()}
+   *
+   * @return true or false
+   * @see SqlBrite#yieldIfContendedSafely()
+   */
+  protected boolean yieldIfContendedSafely() {
+    return sqlBrite.yieldIfContendedSafely();
+  }
+
+  /**
+   * Calls {@link SqlBrite#yieldIfContendedSafely(long, TimeUnit)}
+   *
+   * @param sleepAmount Sleep amount
+   * @param sleepUnit time unit
+   * @return true or false
+   * @see SqlBrite#yieldIfContendedSafely(long, TimeUnit)
+   */
+  protected boolean yieldIfContendedSafely(long sleepAmount, TimeUnit sleepUnit) {
+    return sqlBrite.yieldIfContendedSafely(sleepAmount, sleepUnit);
+  }
+
+  /**
    * Execute a query. Automatically registers itself for updates (trigger)
    *
    * @param statement the sql statement
@@ -97,15 +120,16 @@ public abstract class Dao {
 
   /**
    * Exceutes a ray query
+   *
    * @param tables The affected table updates get triggered if the observer table changes
    * @param sql The sql query statement
    * @param args the sql query args
    * @return Observable of this query
    */
-  protected Observable<SqlBrite.Query> rawQuery(@NonNull final Iterable<String> tables, @NonNull String sql, @NonNull String... args){
+  protected Observable<SqlBrite.Query> rawQuery(@NonNull final Iterable<String> tables,
+      @NonNull String sql, @NonNull String... args) {
     return sqlBrite.createQuery(tables, sql, args);
   }
-
 
   /**
    * Creates a raw sql query
@@ -119,8 +143,6 @@ public abstract class Dao {
       @NonNull String... args) {
     return sqlBrite.createQuery(table, sql, args);
   }
-
-
 
   /**
    * Insert a row into the given table

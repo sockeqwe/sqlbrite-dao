@@ -5,6 +5,7 @@ import android.database.DatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import com.squareup.sqlbrite.SqlBrite;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,7 +18,7 @@ import java.util.Set;
  *
  * @author Hannes Dorfmann
  */
-public class DaoManager extends SQLiteOpenHelper {
+public class DaoManager {
 
   /**
    * A simple map to hold the references to a concrete {@link Dao}.
@@ -35,8 +36,8 @@ public class DaoManager extends SQLiteOpenHelper {
   public DaoManager(Context c, String databaseName, int version,
       SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler, Dao... daos) {
 
-    super(c, databaseName, factory, version, errorHandler);
-    this.sqlBrite = SqlBrite.create(this);
+    OpenHelper openHelper = new OpenHelper(c, databaseName, factory, version, errorHandler);
+    this.sqlBrite = SqlBrite.create(openHelper);
     this.name = databaseName;
     this.version = version;
     for (Dao dao : daos) {
@@ -66,6 +67,16 @@ public class DaoManager extends SQLiteOpenHelper {
   }
 
   /**
+   * Close the database
+   * @throws IOException
+   */
+  public void close() throws IOException {
+    sqlBrite.close();
+  }
+
+
+
+  /**
    * Activate or deactivate logging
    *
    * @param enabled true if logging enabled, false if not.
@@ -82,17 +93,25 @@ public class DaoManager extends SQLiteOpenHelper {
     daos.add(dao);
   }
 
-  @Override public void onCreate(SQLiteDatabase db) {
-
-    for (Dao d : daos) {
-      d.createTable(db);
+  /**
+   * Internally used SqlOpenHelper
+   */
+  private class OpenHelper extends SQLiteOpenHelper {
+    public OpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
+        int version, DatabaseErrorHandler errorHandler) {
+      super(context, name, factory, version, errorHandler);
     }
-  }
 
-  @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    @Override public void onCreate(SQLiteDatabase db) {
+      for (Dao d : daos) {
+        d.createTable(db);
+      }
+    }
 
-    for (Dao d : daos) {
-      d.onUpgrade(db, oldVersion, newVersion);
+    @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+      for (Dao d : daos) {
+        d.onUpgrade(db, oldVersion, newVersion);
+      }
     }
   }
 }
