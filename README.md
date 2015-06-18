@@ -211,6 +211,6 @@ daoManager.setLogging(true);
 
 Please note that adding DAO's dynamically (later) is not possible. You have to instantiate a `DaoManager` and pass all your DAO's in the constructor as seen above.
 
-To sum it up:
+To sum up:
  - A `DaoManager` is representing the whole database file and basically is a `SQLiteOpenHelper` and manages `SqlBrite` instance for you.
  - A `Dao` is representing a table of a database and provides public API like `getCustomers()` or `addCustomer()` to query and manipulate the data of the table.
