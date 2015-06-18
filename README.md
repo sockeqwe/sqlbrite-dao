@@ -7,7 +7,7 @@ This library adds an layer on top of [SQLBrite](https://github.com/square/sqlbri
 
 
 ## ObjectMapper
-This project doesn't aim to implement a full ORM framework and will never be. However, it uses annotation processing to generate code for reading value from `Cursor` and handle `ContentValues`.
+This project doesn't aim to implement a full ORM framework and will never be. It just uses annotation processing to generate code for reading value from `Cursor` and handle `ContentValues`.
 With `@Column` you specify with database table column belongs to which field of your Model class. You can annotate fields (no private or protected fields are allowed) or public setter methods.
 With `@ObjectMappable` you have to annotate your model class containnig `@Column` annotations like this:
 
@@ -153,7 +153,7 @@ public class CustomerDao extends Dao {
 
 `onCreateTable()` and `onUpgrade()` gets called internally (from an internal `SQLiteOpenHelper`) to create or migrate the table for `Customer`.
 
-As you already have seen above, the DAO provides provides a high level API so you don't have to deal that much with String concatenation and can use IDE's auto completion to build your queries. The same API can be used to create SQL query statements:
+As you already have seen above, the DAO provides provides a high level API so you don't have to deal that much with String concatenation and can use IDE's auto completion to build your sql statements. The same API can be used to create SQL query statements:
 
 ```java
 public class CustomerDao extends Dao {
