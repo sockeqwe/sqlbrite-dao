@@ -217,6 +217,7 @@ To sum up:
 
 ## Dependencies
 Latest version: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/badge.png)](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/)
+
 Latest version: 0.2.0
 
 ```groovy
@@ -228,4 +229,4 @@ compile 'com.hannesdorfmann.sqlbrite:annotations:xxx'
 apt 'com.hannesdorfmann.sqlbrite:object-mapper:xxx'
 ```
 To run annotation processing you have to use [apt](https://bitbucket.org/hvisser/android-apt).
-Please note that DAO and Object-Mapper are independent. You can choose whether you want to use one both or not. You could also use Object-Mapper for your database without using SQLBrite at all.
+Please note that DAO and Object-Mapper are independent. You can choose whether you want to use both or not. You could also use Object-Mapper for your database without using SQLBrite at all.
