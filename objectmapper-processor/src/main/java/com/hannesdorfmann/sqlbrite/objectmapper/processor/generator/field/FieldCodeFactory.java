@@ -18,48 +18,47 @@ public class FieldCodeFactory {
 
   public static CodeGenerator get(ColumnAnnotatedField field) throws ProcessingException {
 
-    String fieldName = field.getFieldName();
 
     VariableElement element = field.getField();
     switch (element.asType().getKind()) {
 
       case INT:
-        return new FieldCodeGenerator(fieldName, "getInt");
+        return new FieldCodeGenerator(field, "getInt");
 
       case FLOAT:
-        return new FieldCodeGenerator(fieldName, "getFloat");
+        return new FieldCodeGenerator(field, "getFloat");
 
       case DOUBLE:
-        return new FieldCodeGenerator(fieldName, "getDouble");
+        return new FieldCodeGenerator(field, "getDouble");
 
       case LONG:
-        return new FieldCodeGenerator(fieldName, "getLong");
+        return new FieldCodeGenerator(field, "getLong");
 
       case SHORT:
-        return new FieldCodeGenerator(fieldName, "getShort");
+        return new FieldCodeGenerator(field, "getShort");
 
       case ARRAY:
         ArrayType arrayType = (ArrayType) element.asType();
         if (arrayType.getComponentType().getKind() == TypeKind.BYTE) {
-          return new FieldCodeGenerator(fieldName, "getBlob");
+          return new FieldCodeGenerator(field, "getBlob");
         }
         break;
 
       case DECLARED:
         String varType = element.asType().toString();
         if (varType.equals(String.class.getCanonicalName())) {
-          return new FieldCodeGenerator(fieldName, "getString");
+          return new FieldCodeGenerator(field, "getString");
         }
 
         if (varType.equals(Date.class.getCanonicalName())) {
-          return new DateFieldCodeGenerator(fieldName);
+          return new DateFieldCodeGenerator(field);
         }
         break;
     }
 
     throw new ProcessingException(element,
         "Unsupported type for field %s in class %S annotated with @%s. Don't know how to read the type %s",
-        fieldName, field.getQualifiedSurroundingClassName(), Column.class.getSimpleName(),
+        field, field.getQualifiedSurroundingClassName(), Column.class.getSimpleName(),
         element.asType().toString());
   }
 }

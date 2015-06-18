@@ -92,8 +92,35 @@ public abstract class Dao {
       affectedTables = new HashSet<>();
     }
 
-    return sqlBrite.createQuery(affectedTables, compileableStatement.sql, args);
+    return rawQuery(affectedTables, compileableStatement.sql, args);
   }
+
+  /**
+   * Exceutes a ray query
+   * @param tables The affected table updates get triggered if the observer table changes
+   * @param sql The sql query statement
+   * @param args the sql query args
+   * @return Observable of this query
+   */
+  protected Observable<SqlBrite.Query> rawQuery(@NonNull final Iterable<String> tables, @NonNull String sql, @NonNull String... args){
+    return sqlBrite.createQuery(tables, sql, args);
+  }
+
+
+  /**
+   * Creates a raw sql query
+   *
+   * @param table The affected table updates get triggered if the observer table changes
+   * @param sql The sql query statement
+   * @param args the sql query args
+   * @return Observable of this query
+   */
+  protected Observable<SqlBrite.Query> rawQuery(@NonNull final String table, @NonNull String sql,
+      @NonNull String... args) {
+    return sqlBrite.createQuery(table, sql, args);
+  }
+
+
 
   /**
    * Insert a row into the given table

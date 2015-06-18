@@ -1,6 +1,8 @@
 package com.hannesdorfmann.sqlbrite.objectmapper.processor.generator;
 
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 
 /**
  * Interface for code generator
@@ -20,4 +22,7 @@ public interface CodeGenerator {
    */
   public void generateAssignStatement(MethodSpec.Builder builder, String objectVarName,
       String cursorVarName, String indexVarName);
+
+  public void generateContentValuesBuilderMethod(TypeSpec.Builder builder, TypeName type,
+      String contentValuesVarName);
 }

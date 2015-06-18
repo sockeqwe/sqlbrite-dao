@@ -4,9 +4,12 @@ import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.CodeGenerator;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.method.MethodCodeFactory;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 
 /**
  * @author Hannes Dorfmann
@@ -69,5 +72,14 @@ public class ColumnAnnotatedMethod implements ColumnAnnotateable {
 
   public ExecutableElement getMethod() {
     return method;
+  }
+
+  public VariableElement getParameter() {
+    return method.getParameters().get(0);
+  }
+
+  @Override public void generateContentValuesBuilderMethod(TypeSpec.Builder builder,
+      TypeName type, String contentValuesVarName) {
+    codeGenerator.generateContentValuesBuilderMethod(builder, type, contentValuesVarName);
   }
 }

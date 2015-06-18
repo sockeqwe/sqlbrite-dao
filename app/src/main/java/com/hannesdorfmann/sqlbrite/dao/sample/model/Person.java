@@ -1,7 +1,16 @@
 package com.hannesdorfmann.sqlbrite.dao.sample.model;
 
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
+import com.hannesdorfmann.sqlbrite.dao.Dao;
+import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.Customer;
+import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.CustomerMapper;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.ObjectMappable;
+import com.squareup.sqlbrite.SqlBrite;
+import java.util.List;
+import rx.Observable;
+import rx.functions.Func1;
 
 /**
  * @author Hannes Dorfmann
@@ -23,4 +32,5 @@ public abstract class Person {
   public long getId() {
     return id;
   }
+
 }

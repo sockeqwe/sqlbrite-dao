@@ -26,22 +26,18 @@ public class CustomerDao extends Dao {
 
   public Observable<List<Customer>> getCustomers() {
     return query(SELECT(Customer.COL_ID, Customer.COL_FIRSTNAME, Customer.COL_LASTNAME).FROM(
-        Customer.TABLE_NAME)).map(
-        new Func1<SqlBrite.Query, List<Customer>>() {
-          @Override public List<Customer> call(SqlBrite.Query query) {
+        Customer.TABLE_NAME)).map(new Func1<SqlBrite.Query, List<Customer>>() {
+      @Override public List<Customer> call(SqlBrite.Query query) {
 
-            return CustomerMapper.list(query.run());
-          }
-        });
+        return CustomerMapper.list(query.run());
+      }
+    });
   }
 
-
-
   public Observable<Long> insert(int id, String firstname, String lastname) {
-    ContentValues values = new ContentValues();
-    values.put(Customer.COL_ID, id);
-    values.put(Customer.COL_FIRSTNAME, firstname);
-    values.put(Customer.COL_LASTNAME, lastname);
+    ContentValues values =
+        CustomerMapper.contentValues().id(id).firstname(firstname).lastname(lastname).build();
+
     return insert(Customer.TABLE_NAME, values);
   }
 }

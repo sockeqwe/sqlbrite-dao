@@ -8,8 +8,8 @@ import android.widget.Toast;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import com.hannesdorfmann.mosby.dagger1.Dagger1MosbyActivity;
+import com.hannesdorfmann.sqlbrite.dao.sample.model.Person;
 import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.Customer;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.CustomerDao;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Subscriber;
@@ -18,7 +18,7 @@ import rx.functions.Action1;
 
 public class MainActivity extends Dagger1MosbyActivity {
 
-  @Inject CustomerDao customerDao;
+  @Inject Person.CustomerDao customerDao;
   @InjectView(R.id.recyclerView) RecyclerView recyclerView;
   @InjectView(R.id.cid) EditText idEdit;
   @InjectView(R.id.lastname) EditText lastnameEdit;

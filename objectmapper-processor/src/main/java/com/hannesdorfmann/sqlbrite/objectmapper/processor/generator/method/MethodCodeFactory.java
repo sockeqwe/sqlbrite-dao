@@ -17,11 +17,9 @@ import javax.lang.model.type.TypeMirror;
  */
 public class MethodCodeFactory {
 
-  public static CodeGenerator get(ColumnAnnotatedMethod method) throws ProcessingException {
+  public static CodeGenerator get(ColumnAnnotatedMethod methodName) throws ProcessingException {
 
-    String methodName = method.getMethodName();
-
-    ExecutableElement element = method.getMethod();
+    ExecutableElement element = methodName.getMethod();
     TypeMirror parameter =element.getParameters().get(0).asType();
 
     switch (parameter.getKind()) {
@@ -63,6 +61,6 @@ public class MethodCodeFactory {
     throw new ProcessingException(element,
         "Unsupported type %s as parameter in method %s() in class %s annotated with @%s. Don't know how to read the parameter type",
         parameter.toString(), methodName,
-        method.getQualifiedSurroundingClassName(), Column.class.getSimpleName());
+        methodName.getQualifiedSurroundingClassName(), Column.class.getSimpleName());
   }
 }

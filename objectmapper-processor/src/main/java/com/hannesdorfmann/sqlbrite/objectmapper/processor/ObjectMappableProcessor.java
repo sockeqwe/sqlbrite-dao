@@ -1,5 +1,6 @@
 package com.hannesdorfmann.sqlbrite.objectmapper.processor;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import com.google.auto.service.AutoService;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
@@ -108,7 +109,8 @@ import javax.tools.Diagnostic;
         }
 
         // Check if class is already added to the annotated classes
-        ObjectMappableAnnotatedClass annotatedClass = new ObjectMappableAnnotatedClass(classElement);
+        ObjectMappableAnnotatedClass annotatedClass =
+            new ObjectMappableAnnotatedClass(classElement);
         if (annotatedClasses.contains(annotatedClass)) {
           continue;
         }
@@ -139,8 +141,7 @@ import javax.tools.Diagnostic;
 
     for (ObjectMappableAnnotatedClass clazz : annotatedClasses) {
 
-      PackageElement pkg = elements.getPackageOf(clazz.getElement());
-      String packageName = pkg.isUnnamed() ? "" : pkg.getQualifiedName().toString();
+      String packageName = getPackageName(clazz);
 
       MethodSpec listMethod = generateListMethod(clazz);
       MethodSpec simpleListMethod = generateSimpleListMethod(clazz);
@@ -149,12 +150,16 @@ import javax.tools.Diagnostic;
 
       // Generate the mapper class
       TypeSpec mapperClass = TypeSpec.classBuilder(clazz.getSimpleClassName() + "Mapper")
+          .addJavadoc("Generated class to work with Cursors and ContentValues for $T\n",
+              ClassName.get(clazz.getElement()))
           .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
           .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
           .addMethod(simpleSingleMethod)
           .addMethod(singleMethod)
           .addMethod(simpleListMethod)
           .addMethod(listMethod)
+          .addMethod(generateContentValuesMethod(clazz, "ContentValuesBuilder"))
+          .addType(generateContentValuesBuilderClass(clazz, "ContentValuesBuilder"))
           .build();
 
       JavaFile.builder(packageName, mapperClass).build().writeTo(filer);
@@ -178,15 +183,15 @@ import javax.tools.Diagnostic;
 
     // List Method
     return MethodSpec.methodBuilder("list")
-    /*
         .addJavadoc(
-            "Fetches a list of {@ling $L} from a Cursor by scanning for @$L annotated fields. Calls {@link #list(Cursor,boolean)} with true as second parameter ",
-            clazz.getElement().getSimpleName().toString(), Column.class.getSimpleName())
-        .addJavadoc("@param $L The Cursor", cursorVarName)
+            "Fetches a list of {@link $T } from a Cursor by scanning for $L annotated fields. "
+                + "Calls {@link #list(Cursor,boolean)} with true as second parameter \n",
+            ClassName.get(clazz.getElement()), "@" + Column.class.getSimpleName())
+        .addJavadoc("@param $L The Cursor \n", cursorVarName)
         .addJavadoc(
-            "@return An empty List if cursor is empty or a list of items fetched from the cursor")
-        .addJavadoc("@see #list(Cursor,boolean)")
-        */.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            "@return An empty List if cursor is empty or a list of items fetched from the cursor\n")
+        .addJavadoc("@see #list(Cursor,boolean)\n")
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .addParameter(Cursor.class, cursorVarName)
         .returns(typedList)
         .addStatement("return list($L, true)", cursorVarName)
@@ -217,16 +222,17 @@ import javax.tools.Diagnostic;
 
     // List Method
     MethodSpec.Builder listMethod = MethodSpec.methodBuilder("list")
-       /*
         .addJavadoc(
-            "Fetches a list of {@ling $L} from a Cursor by scanning for @$L annotated fields",
-            clazz.getElement().getSimpleName().toString(), Column.class.getSimpleName())
+            "Fetches a list of {@link $T } from a Cursor by scanning for $L annotated fields\n",
+            ClassName.get(clazz.getElement()), "@" + Column.class.getSimpleName())
         .addJavadoc("@param $L The Cursor", cursorVarName)
         .addJavadoc(
-            "@param $L <b>true</b>, if an {@link IllegalArgumentException} should be thrown if the column doesn't exist. <b>false</b> if missing columns should be skipped")
+            "@param $L <b>true</b>, if an {@link IllegalArgumentException} should be thrown if the"
+                + " column doesn't exist. <b>false</b> if missing columns should be skipped\n",
+            throwOnIndexNotFoundVarName)
         .addJavadoc(
-            "@return An empty List if cursor is empty or a list of items fetched from the cursor")
-            */.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            "@return An empty List if cursor is empty or a list of items fetched from the cursor\n")
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .addParameter(Cursor.class, cursorVarName)
         .addParameter(boolean.class, throwOnIndexNotFoundVarName)
         .returns(typedList)
@@ -236,7 +242,7 @@ import javax.tools.Diagnostic;
         .addStatement("return new $T(0)", typedArrayList)
         .endControlFlow();
 
-    gennerateColumnIndexCode(listMethod, clazz.getColumnAnnotatedElements(), cursorVarName,
+    generateColumnIndexCode(listMethod, clazz.getColumnAnnotatedElements(), cursorVarName,
         throwOnIndexNotFoundVarName);
 
     listMethod.addStatement("$T $L = new $T($L.getCount())", typedList, listVarName, typedArrayList,
@@ -280,14 +286,14 @@ import javax.tools.Diagnostic;
 
     // List Method
     return MethodSpec.methodBuilder("single")
-        /*
+
         .addJavadoc(
-            "Retrieves the first element from  Cursor by scanning for @$L annotated fields. Calls {@link #single(Cursor,boolean)} with true as second parameter ",
-            clazz.getElement().getSimpleName().toString(), Column.class.getSimpleName())
-        .addJavadoc("@param $L The Cursor", cursorVarName)
-        .addJavadoc("@return null if Cursor is empty or  a single item fetched from the cursor")
-        .addJavadoc("@see #single(Cursor,boolean)")
-        */.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            "Retrieves the first element from  Cursor by scanning for $L annotated fields. Calls {@link #single(Cursor,boolean)} with true as second parameter\n",
+            "@" + Column.class.getSimpleName())
+        .addJavadoc("@param $L The Cursor\n", cursorVarName)
+        .addJavadoc("@return null if Cursor is empty or  a single item fetched from the cursor\n")
+        .addJavadoc("@see #single(Cursor,boolean)\n")
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .addParameter(Cursor.class, cursorVarName)
         .returns(elementType)
         .addStatement("return single($L, true)", cursorVarName)
@@ -310,14 +316,17 @@ import javax.tools.Diagnostic;
 
     // List Method
     MethodSpec.Builder builder = MethodSpec.methodBuilder("single")
-        /*
-        .addJavadoc("Retrieves the first element from  Cursor by scanning for @$L annotated fields",
-            Column.class.getSimpleName())
-        .addJavadoc("@param $L The Cursor", cursorVarName)
         .addJavadoc(
-            "@param $L <b>true</b>, if an {@link IllegalArgumentException} should be thrown if the column doesn't exist. <b>false</b> if missing columns should be skipped")
-        .addJavadoc("@return The fetched item from Cursor or <code>null</code> if cursor is empty")
-        */.addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            "Retrieves the first element from  Cursor by scanning for $L annotated fields \n",
+            "@" + Column.class.getSimpleName())
+        .addJavadoc("@param $L The Cursor\n", cursorVarName)
+        .addJavadoc(
+            "@param $L <b>true</b>, if an {@link IllegalArgumentException} should be thrown if "
+                + "the column doesn't exist. <b>false</b> if missing columns should be skipped\n",
+            throwOnIndexNotFoundVarName)
+        .addJavadoc(
+            "@return The fetched item from Cursor or <code>null</code> if cursor is empty\n")
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
         .addParameter(Cursor.class, cursorVarName)
         .addParameter(boolean.class, throwOnIndexNotFoundVarName)
         .returns(elementType)
@@ -327,7 +336,7 @@ import javax.tools.Diagnostic;
         .addStatement("return null")
         .endControlFlow();
 
-    gennerateColumnIndexCode(builder, clazz.getColumnAnnotatedElements(), cursorVarName,
+    generateColumnIndexCode(builder, clazz.getColumnAnnotatedElements(), cursorVarName,
         throwOnIndexNotFoundVarName);
 
     builder.addStatement("$T $L = new $T()", elementType, objectVarName, elementType);
@@ -359,7 +368,7 @@ import javax.tools.Diagnostic;
    * @param throwOnIndexNotFoundVarName The variable name of the boolean variable to check if
    * <i>getColumnIndexOrThrow</i> should be used
    */
-  private void gennerateColumnIndexCode(MethodSpec.Builder builder,
+  private void generateColumnIndexCode(MethodSpec.Builder builder,
       Collection<ColumnAnnotateable> elements, String cursorVarName,
       String throwOnIndexNotFoundVarName) {
 
@@ -378,5 +387,75 @@ import javax.tools.Diagnostic;
           e.getColumnName());
     }
     builder.endControlFlow();
+  }
+
+  /**
+   * Generates the ContentValues Builder Class
+   *
+   * @param clazz The class you want to create a builder for
+   * @param className The classname
+   * @return The Builder class
+   */
+  private TypeSpec generateContentValuesBuilderClass(ObjectMappableAnnotatedClass clazz,
+      String className) {
+
+    String cvVarName = "contentValues";
+
+    MethodSpec constructor = MethodSpec.constructorBuilder()
+        .addModifiers(Modifier.PRIVATE)
+        .addStatement("$L = new $T()", cvVarName, ClassName.get(ContentValues.class))
+        .build();
+
+    TypeSpec.Builder builder = TypeSpec.classBuilder(className)
+        .addJavadoc(
+            "Builder class to generate type sage {@link $T } . At the end you have to call {@link #build()}\n",
+            TypeName.get(ContentValues.class))
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        .addField(ContentValues.class, cvVarName, Modifier.PRIVATE)
+        .addMethod(constructor)
+        .addMethod(MethodSpec.methodBuilder("build")
+            .addJavadoc("Creates and returnes a $T from the builder\n",
+                TypeName.get(ContentValues.class))
+            .addJavadoc("@return $T", TypeName.get(ContentValues.class))
+            .addModifiers(Modifier.PUBLIC)
+            .addStatement("return $L", cvVarName)
+            .returns(ContentValues.class)
+            .build());
+
+    String packageName = getPackageName(clazz);
+    for (ColumnAnnotateable e : clazz.getColumnAnnotatedElements()) {
+      e.generateContentValuesBuilderMethod(builder, ClassName.get(packageName, className),
+          cvVarName);
+    }
+
+    return builder.build();
+  }
+
+  /**
+   * Generates a static file to get
+   */
+  private MethodSpec generateContentValuesMethod(ObjectMappableAnnotatedClass clazz,
+      String className) {
+
+    ClassName typeName = ClassName.get(getPackageName(clazz), className);
+
+    return MethodSpec.methodBuilder("contentValues")
+        .addJavadoc("Get a typesafe ContentValues Builder \n")
+        .addJavadoc("@return The ContentValues Builder \n")
+        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+        .returns(typeName)
+        .addStatement("return new $T()", typeName)
+        .build();
+  }
+
+  /**
+   * Get the package name of a certain clazz
+   *
+   * @param clazz The class you want the packagename for
+   * @return The package name
+   */
+  private String getPackageName(ObjectMappableAnnotatedClass clazz) {
+    PackageElement pkg = elements.getPackageOf(clazz.getElement());
+    return pkg.isUnnamed() ? "" : pkg.getQualifiedName().toString();
   }
 }

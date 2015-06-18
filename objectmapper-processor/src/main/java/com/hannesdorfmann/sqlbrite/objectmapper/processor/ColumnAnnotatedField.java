@@ -4,6 +4,8 @@ import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.CodeGenerator;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.field.FieldCodeFactory;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
@@ -102,6 +104,12 @@ public class ColumnAnnotatedField implements ColumnAnnotateable {
       String cursorVarName, String indexVarName) {
 
     codeGenerator.generateAssignStatement(builder, objectVarName, cursorVarName, indexVarName);
+  }
+
+  @Override public void generateContentValuesBuilderMethod(TypeSpec.Builder builder,
+      TypeName type, String contentValuesVarName) {
+    codeGenerator.generateContentValuesBuilderMethod(builder, type,
+        contentValuesVarName);
   }
 
   @Override public String getElementName() {

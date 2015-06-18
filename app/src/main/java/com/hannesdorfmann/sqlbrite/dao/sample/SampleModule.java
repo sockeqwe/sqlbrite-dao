@@ -2,7 +2,7 @@ package com.hannesdorfmann.sqlbrite.dao.sample;
 
 import android.content.Context;
 import com.hannesdorfmann.sqlbrite.dao.DaoManager;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.CustomerDao;
+import com.hannesdorfmann.sqlbrite.dao.sample.model.Person;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;
@@ -20,17 +20,17 @@ import javax.inject.Singleton;
 public class SampleModule {
 
   Context context;
-  CustomerDao customerDao;
+  Person.CustomerDao customerDao;
   DaoManager daoManager;
 
   public SampleModule(Context context) {
     this.context = context;
-    customerDao = new CustomerDao();
+    customerDao = new Person.CustomerDao();
     daoManager = new DaoManager(context, "Customers.db", 1, customerDao);
     daoManager.setLogging(true);
   }
 
-  @Singleton @Provides public CustomerDao providesCustomerDao(){
+  @Singleton @Provides public Person.CustomerDao providesCustomerDao(){
     return customerDao;
   }
 }
