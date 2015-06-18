@@ -214,3 +214,18 @@ Please note that adding DAO's dynamically (later) is not possible. You have to i
 To sum up:
  - A `DaoManager` is representing the whole database file and basically is a `SQLiteOpenHelper` and manages `SqlBrite` instance for you.
  - A `Dao` is representing a table of a database. You define a public API for other software components of your App like `getCustomers()` or `addCustomer()` to query and manipulate the data of the underlying table.
+
+## Dependencies
+Latest version: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/badge.png)](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/)
+Latest version: 0.2.0
+
+```groovy
+// DAO
+compile 'com.hannesdorfmann.sqlbrite:dao:xxx'
+
+// Object Mapper
+compile 'com.hannesdorfmann.sqlbrite:annotations:xxx'
+apt 'com.hannesdorfmann.sqlbrite:object-mapper:xxx'
+```
+To run annotation processing you have to use [apt](https://bitbucket.org/hvisser/android-apt).
+Please note that DAO and Object-Mapper are independent. You can choose whether you want to use one both or not. You could also use Object-Mapper for your database without using SQLBrite at all.
