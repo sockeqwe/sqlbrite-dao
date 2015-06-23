@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import rx.Observable;
-import rx.functions.Func0;
 
 /**
  * Data Access Object (DAO).
@@ -152,11 +151,7 @@ public abstract class Dao {
    * @return An observable with the row Id of the new inserted row
    */
   protected Observable<Long> insert(final String table, final ContentValues contentValues) {
-    return Observable.defer(new Func0<Observable<Long>>() {
-      @Override public Observable<Long> call() {
-        return Observable.just(sqlBrite.insert(table, contentValues));
-      }
-    });
+    return Observable.just(sqlBrite.insert(table, contentValues));
   }
 
   /**
@@ -169,11 +164,7 @@ public abstract class Dao {
    */
   protected Observable<Long> insert(final String table, final ContentValues contentValues,
       final int conflictAlgorithm) {
-    return Observable.defer(new Func0<Observable<Long>>() {
-      @Override public Observable<Long> call() {
-        return Observable.just(sqlBrite.insert(table, contentValues, conflictAlgorithm));
-      }
-    });
+    return Observable.just(sqlBrite.insert(table, contentValues, conflictAlgorithm));
   }
 
   /**
@@ -188,11 +179,7 @@ public abstract class Dao {
   protected Observable<Integer> update(@NonNull final String table,
       @NonNull final ContentValues values, @Nullable final String whereClause,
       @Nullable final String... whereArgs) {
-    return Observable.defer(new Func0<Observable<Integer>>() {
-      @Override public Observable<Integer> call() {
-        return Observable.just(sqlBrite.update(table, values, whereClause, whereArgs));
-      }
-    });
+    return Observable.just(sqlBrite.update(table, values, whereClause, whereArgs));
   }
 
   /**
@@ -208,12 +195,9 @@ public abstract class Dao {
   protected Observable<Integer> update(@NonNull final String table,
       @NonNull final ContentValues values, final int conflictAlgorithm,
       @Nullable final String whereClause, @Nullable final String... whereArgs) {
-    return Observable.defer(new Func0<Observable<Integer>>() {
-      @Override public Observable<Integer> call() {
-        return Observable.just(
-            sqlBrite.update(table, values, conflictAlgorithm, whereClause, whereArgs));
-      }
-    });
+
+    return Observable.just(
+        sqlBrite.update(table, values, conflictAlgorithm, whereClause, whereArgs));
   }
 
   /**
@@ -236,11 +220,7 @@ public abstract class Dao {
    */
   protected Observable<Integer> delete(@NonNull final String table,
       @Nullable final String whereClause, @Nullable final String... whereArgs) {
-    return Observable.defer(new Func0<Observable<Integer>>() {
-      @Override public Observable<Integer> call() {
-        return Observable.just(sqlBrite.delete(table, whereClause, whereArgs));
-      }
-    });
+    return Observable.just(sqlBrite.delete(table, whereClause, whereArgs));
   }
 
   /**

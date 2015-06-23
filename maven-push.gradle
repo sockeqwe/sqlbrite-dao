@@ -112,6 +112,7 @@ afterEvaluate { project ->
     sign configurations.archives
   }
 
+
   /*
   task androidJavadocs(type: Javadoc) {
     source = android.sourceSets.main.java.srcDirs
@@ -130,4 +131,5 @@ afterEvaluate { project ->
     archives androidJavadocsJar
   }
   */
+
 }
