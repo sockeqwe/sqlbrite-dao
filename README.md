@@ -218,8 +218,6 @@ To sum up:
 ## Dependencies
 Latest version: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/badge.png)](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/)
 
-Latest version: 0.2.0
-
 ```groovy
 // DAO
 compile 'com.hannesdorfmann.sqlbrite:dao:xxx'
