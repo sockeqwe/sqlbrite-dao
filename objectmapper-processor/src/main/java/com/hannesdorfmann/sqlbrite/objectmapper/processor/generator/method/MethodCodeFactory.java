@@ -40,19 +40,19 @@ public class MethodCodeFactory {
         return new MethodCodeGenerator(methodName, "getShort");
 
       case ARRAY:
-        ArrayType arrayType = (ArrayType) element.asType();
-        if (arrayType.getComponentType().getKind() == TypeKind.BYTE) {
+        ArrayType parameterArrayType = (ArrayType) parameter;
+        if (parameterArrayType.getComponentType().getKind() == TypeKind.BYTE) {
           return new MethodCodeGenerator(methodName, "getBlob");
         }
         break;
 
       case DECLARED:
-        String varType = element.asType().toString();
-        if (varType.equals(String.class.getCanonicalName())) {
+        String parameterType = parameter.toString();
+        if (parameterType.equals(String.class.getCanonicalName())) {
           return new MethodCodeGenerator(methodName, "getString");
         }
 
-        if (varType.equals(Date.class.getCanonicalName())) {
+        if (parameterType.equals(Date.class.getCanonicalName())) {
           return new DateMethodCodeGenerator(methodName);
         }
         break;
