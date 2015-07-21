@@ -23,7 +23,7 @@ public class DateMethodCodeGenerator implements CodeGenerator {
   @Override public void generateAssignStatement(MethodSpec.Builder builder, String objectVarName,
       String cursorVarName, String indexVarName) {
 
-    builder.addStatement("$L.$L( new java.util.Date($L.getLong( $L ) )", objectVarName, method.getMethodName(),
+    builder.addStatement("$L.$L( new java.util.Date($L.getLong( $L ) ) )", objectVarName, method.getMethodName(),
         cursorVarName, indexVarName);
   }
 
