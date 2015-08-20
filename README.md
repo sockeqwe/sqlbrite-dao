@@ -174,7 +174,7 @@ public class CustomerDao extends Dao {
         .FROM(Customer.TABLE_NAME)
         .WHERE(Customer.COL_LASTNAME + " = ? "),
 
-        lastname // Argument that replaces "?" in WHERE
+        lastname) // Argument that replaces "?" in WHERE
 
        .map(new Func1<SqlBrite.Query, List<Customer>>() {  // Converts SqlBrite.Query to List<Customer>
 
