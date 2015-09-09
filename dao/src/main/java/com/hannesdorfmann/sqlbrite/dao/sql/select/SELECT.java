@@ -15,8 +15,7 @@ public class SELECT extends SqlRootNode {
 	/**
 	 * Create a <code>SELECT column1, column2, ... FROM tableName
 	 *
-	 * @param columns
-	 *            The list of columns
+	 * @param columns The list of columns, pass * for selecting all columns
 	 */
 	public SELECT(String... columns) {
 
