@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlCompileable;
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlFinishedStatement;
 import com.hannesdorfmann.sqlbrite.dao.sql.alter.ALTER_TABLE;
@@ -19,11 +18,8 @@ import com.hannesdorfmann.sqlbrite.dao.sql.view.DROP_VIEW;
 import com.hannesdorfmann.sqlbrite.dao.sql.view.DROP_VIEW_IF_EXISTS;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
-
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import rx.Observable;
 
 import static com.squareup.sqlbrite.BriteDatabase.Transaction;
@@ -36,7 +32,6 @@ import static com.squareup.sqlbrite.BriteDatabase.Transaction;
 public abstract class Dao {
 
   protected BriteDatabase db;
-  protected Transaction transaction;
 
   /**
    * Create here the database table for the given dao
@@ -68,24 +63,13 @@ public abstract class Dao {
   }
 
   /**
-   * Calls {@link Transaction#yieldIfContendedSafely()}
+   * Create a new Transaction. Don't forget to commit your changes by marking the transaction as
+   * successful or rollback your changes.
    *
-   * @return true or false
+   * @return New transaction.
    */
-  protected boolean yieldIfContendedSafely() {
-    return transaction.yieldIfContendedSafely();
-  }
-
-  /**
-   * Calls {@link Transaction#yieldIfContendedSafely(long, TimeUnit)}
-   *
-   * @param sleepAmount Sleep amount
-   * @param sleepUnit time unit
-   * @return true or false
-   * @see Transaction#yieldIfContendedSafely(long, TimeUnit)
-   */
-  protected boolean yieldIfContendedSafely(long sleepAmount, TimeUnit sleepUnit) {
-    return transaction.yieldIfContendedSafely();
+  public Transaction newTransaction() {
+    return db.newTransaction();
   }
 
   /**
@@ -296,28 +280,5 @@ public abstract class Dao {
    */
   protected DROP_VIEW_IF_EXISTS DROP_VIEW_IF_EXISTS(String viewName) {
     return new DROP_VIEW_IF_EXISTS(viewName);
-  }
-
-  /**
-   * Begins a new sql transaction. Must be followed by
-   * {@link #COMMIT()} or {@link #ROLLBACK()}
-   */
-  public void BEGIN_TRANSACTION() {
-    transaction = db.newTransaction();
-  }
-
-  /**
-   * Commits the current sql transaction
-   */
-  public void COMMIT() {
-    transaction.markSuccessful();
-    transaction.end();
-  }
-
-  /**
-   * Rollback the current sql transaction
-   */
-  public void ROLLBACK() {
-    transaction.end();
   }
 }
