@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlCompileable;
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlFinishedStatement;
 import com.hannesdorfmann.sqlbrite.dao.sql.alter.ALTER_TABLE;
@@ -16,11 +17,16 @@ import com.hannesdorfmann.sqlbrite.dao.sql.view.CREATE_VIEW;
 import com.hannesdorfmann.sqlbrite.dao.sql.view.CREATE_VIEW_IF_NOT_EXISTS;
 import com.hannesdorfmann.sqlbrite.dao.sql.view.DROP_VIEW;
 import com.hannesdorfmann.sqlbrite.dao.sql.view.DROP_VIEW_IF_EXISTS;
+import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import rx.Observable;
+
+import static com.squareup.sqlbrite.BriteDatabase.Transaction;
 
 /**
  * Data Access Object (DAO).
@@ -29,7 +35,8 @@ import rx.Observable;
  */
 public abstract class Dao {
 
-  protected SqlBrite sqlBrite;
+  protected BriteDatabase db;
+  protected Transaction transaction;
 
   /**
    * Create here the database table for the given dao
@@ -50,36 +57,36 @@ public abstract class Dao {
    * Set the {@link SQLiteOpenHelper}. This method will be called from the
    * {@link DaoManager} to inject the {@link SQLiteOpenHelper}.
    * <p>
-   * You should not call this method directly. Let the {@link DaoManager} to
-   * this, because he knows the right moment to invoke this method.
+   * You should not call this method directly. Let the {@link DaoManager} do
+   * this, because it knows the right moment to invoke this method.
    * </p>
    *
-   * @param sqlBrite the database
+   * @param db the database
    */
-  void setSqlBrite(SqlBrite sqlBrite) {
-    this.sqlBrite = sqlBrite;
+  void setSqlBriteDb(BriteDatabase db){
+    this.db=db;
   }
 
   /**
-   * Calls {@link SqlBrite#yieldIfContendedSafely()}
+   * Calls {@link Transaction#yieldIfContendedSafely()}
    *
    * @return true or false
-   * @see SqlBrite#yieldIfContendedSafely()
+   * @see Transaction#yieldIfContendedSafely()
    */
   protected boolean yieldIfContendedSafely() {
-    return sqlBrite.yieldIfContendedSafely();
+    return transaction.yieldIfContendedSafely();
   }
 
   /**
-   * Calls {@link SqlBrite#yieldIfContendedSafely(long, TimeUnit)}
+   * Calls {@link Transaction#yieldIfContendedSafely(long, TimeUnit)}
    *
    * @param sleepAmount Sleep amount
    * @param sleepUnit time unit
    * @return true or false
-   * @see SqlBrite#yieldIfContendedSafely(long, TimeUnit)
+   * @see Transaction#yieldIfContendedSafely(long, TimeUnit)
    */
   protected boolean yieldIfContendedSafely(long sleepAmount, TimeUnit sleepUnit) {
-    return sqlBrite.yieldIfContendedSafely(sleepAmount, sleepUnit);
+    return transaction.yieldIfContendedSafely();
   }
 
   /**
@@ -118,7 +125,7 @@ public abstract class Dao {
   }
 
   /**
-   * Exceutes a ray query
+   * Exceutes a raw query
    *
    * @param tables The affected table updates get triggered if the observer table changes
    * @param sql The sql query statement
@@ -127,7 +134,7 @@ public abstract class Dao {
    */
   protected Observable<SqlBrite.Query> rawQuery(@NonNull final Iterable<String> tables,
       @NonNull String sql, @NonNull String... args) {
-    return sqlBrite.createQuery(tables, sql, args);
+    return db.createQuery(tables, sql, args);
   }
 
   /**
@@ -140,7 +147,7 @@ public abstract class Dao {
    */
   protected Observable<SqlBrite.Query> rawQuery(@NonNull final String table, @NonNull String sql,
       @NonNull String... args) {
-    return sqlBrite.createQuery(table, sql, args);
+    return db.createQuery(table, sql, args);
   }
 
   /**
@@ -151,7 +158,7 @@ public abstract class Dao {
    * @return An observable with the row Id of the new inserted row
    */
   protected Observable<Long> insert(final String table, final ContentValues contentValues) {
-    return Observable.just(sqlBrite.insert(table, contentValues));
+    return Observable.just(db.insert(table, contentValues));
   }
 
   /**
@@ -164,7 +171,7 @@ public abstract class Dao {
    */
   protected Observable<Long> insert(final String table, final ContentValues contentValues,
       final int conflictAlgorithm) {
-    return Observable.just(sqlBrite.insert(table, contentValues, conflictAlgorithm));
+    return Observable.just(db.insert(table, contentValues, conflictAlgorithm));
   }
 
   /**
@@ -179,7 +186,7 @@ public abstract class Dao {
   protected Observable<Integer> update(@NonNull final String table,
       @NonNull final ContentValues values, @Nullable final String whereClause,
       @Nullable final String... whereArgs) {
-    return Observable.just(sqlBrite.update(table, values, whereClause, whereArgs));
+    return Observable.just(db.update(table, values, whereClause, whereArgs));
   }
 
   /**
@@ -197,7 +204,7 @@ public abstract class Dao {
       @Nullable final String whereClause, @Nullable final String... whereArgs) {
 
     return Observable.just(
-        sqlBrite.update(table, values, conflictAlgorithm, whereClause, whereArgs));
+        db.update(table, values, conflictAlgorithm, whereClause, whereArgs));
   }
 
   /**
@@ -220,7 +227,7 @@ public abstract class Dao {
    */
   protected Observable<Integer> delete(@NonNull final String table,
       @Nullable final String whereClause, @Nullable final String... whereArgs) {
-    return Observable.just(sqlBrite.delete(table, whereClause, whereArgs));
+    return Observable.just(db.delete(table, whereClause, whereArgs));
   }
 
   /**
@@ -298,21 +305,21 @@ public abstract class Dao {
    * {@link #COMMIT()} or {@link #ROLLBACK()}
    */
   public void BEGIN_TRANSACTION() {
-    sqlBrite.beginTransaction();
+    transaction=db.newTransaction();
   }
 
   /**
    * Commits the current sql transaction
    */
   public void COMMIT() {
-    sqlBrite.setTransactionSuccessful();
-    sqlBrite.endTransaction();
+    transaction.markSuccessful();
+    transaction.end();
   }
 
   /**
    * Rollback the current sql transaction
    */
   public void ROLLBACK() {
-    sqlBrite.endTransaction();
+    transaction.end();
   }
 }
