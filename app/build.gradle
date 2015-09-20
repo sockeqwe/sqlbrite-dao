@@ -2,13 +2,13 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 
 android {
-  compileSdkVersion 22
-  buildToolsVersion "22.0.1"
+  compileSdkVersion 23
+  buildToolsVersion "23.0.1"
 
   defaultConfig {
     applicationId "com.hannesdorfmann.sqlbrite.dao.sample"
     minSdkVersion 15
-    targetSdkVersion 22
+    targetSdkVersion 23
     versionCode 1
     versionName "1.0"
   }
@@ -21,33 +21,26 @@ android {
 }
 
 def annotatedAdapter = '1.1.0'
-def supportLib = '22.2.0'
-def mosby = '1.1.0'
+def supportLib = '23.0.1'
 def mapperVersion = '0.2.0'
 
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
-
-  // Support libs
-  compile 'com.android.support:appcompat-v7:'+supportLib
-  compile 'com.android.support:recyclerview-v7:'+supportLib
-  compile 'com.android.support:cardview-v7:'+supportLib
-
   compile project(':dao')
 
-  apt 'com.hannesdorfmann.sqlbrite:object-mapper:'+mapperVersion
-  compile 'com.hannesdorfmann.sqlbrite:annotations:'+mapperVersion
+  // Support libs
+  compile 'com.android.support:appcompat-v7:' + supportLib
+  compile 'com.android.support:recyclerview-v7:' + supportLib
+  compile 'com.android.support:cardview-v7:' + supportLib
 
+  compile 'com.jakewharton:butterknife:7.0.1'
 
+  apt 'com.hannesdorfmann.sqlbrite:object-mapper:' + mapperVersion
+  compile 'com.hannesdorfmann.sqlbrite:annotations:' + mapperVersion
 
-  // Frameworks
-  compile 'com.hannesdorfmann.mosby:viewstate-dagger1:'+mosby
-  compile 'com.hannesdorfmann.mosby:rx:'+mosby
-  apt 'frankiesardo:icepick-processor:3.0.2'
-  apt 'com.hannesdorfmann.fragmentargs:processor:2.1.0'
+  compile 'com.squareup.dagger:dagger:1.2.2'
   apt 'com.squareup.dagger:dagger-compiler:1.2.2'
   apt 'com.hannesdorfmann.annotatedadapter:processor:' + annotatedAdapter
   compile 'com.hannesdorfmann.annotatedadapter:annotation:' + annotatedAdapter
   compile 'com.hannesdorfmann.annotatedadapter:support-recyclerview:' + annotatedAdapter
-
 }

@@ -1,13 +1,13 @@
 package com.hannesdorfmann.sqlbrite.dao.sample;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.EditText;
 import android.widget.Toast;
-import butterknife.InjectView;
+import butterknife.Bind;
 import butterknife.OnClick;
-import com.hannesdorfmann.mosby.dagger1.Dagger1MosbyActivity;
 import com.hannesdorfmann.sqlbrite.dao.sample.model.CustomerDao;
 import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.Customer;
 import java.util.List;
@@ -16,13 +16,13 @@ import rx.Subscriber;
 import rx.Subscription;
 import rx.functions.Action1;
 
-public class MainActivity extends Dagger1MosbyActivity {
+public class MainActivity extends AppCompatActivity {
 
   @Inject CustomerDao customerDao;
-  @InjectView(R.id.recyclerView) RecyclerView recyclerView;
-  @InjectView(R.id.cid) EditText idEdit;
-  @InjectView(R.id.lastname) EditText lastnameEdit;
-  @InjectView(R.id.firstname) EditText firstnameEdit;
+  @Bind(R.id.recyclerView) RecyclerView recyclerView;
+  @Bind(R.id.cid) EditText idEdit;
+  @Bind(R.id.lastname) EditText lastnameEdit;
+  @Bind(R.id.firstname) EditText firstnameEdit;
 
   CustomerAdapter adapter;
 
@@ -32,6 +32,7 @@ public class MainActivity extends Dagger1MosbyActivity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    injectDependencies();
 
     adapter = new CustomerAdapter(this);
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -83,7 +84,7 @@ public class MainActivity extends Dagger1MosbyActivity {
         .subscribe(insertSubscription);
   }
 
-  @Override protected void injectDependencies() {
-    getObjectGraph().inject(this);
+  private void injectDependencies() {
+    ((SampleApp) getApplication()).getObjectGraph().inject(this);
   }
 }

@@ -1,13 +1,12 @@
 package com.hannesdorfmann.sqlbrite.dao.sample;
 
 import android.app.Application;
-import com.hannesdorfmann.mosby.dagger1.Injector;
 import dagger.ObjectGraph;
 
 /**
  * @author Hannes Dorfmann
  */
-public class SampleApp extends Application implements Injector{
+public class SampleApp extends Application {
 
   ObjectGraph objectGraph;
 
@@ -16,7 +15,7 @@ public class SampleApp extends Application implements Injector{
     objectGraph = ObjectGraph.create(new SampleModule(this));
   }
 
-  @Override public ObjectGraph getObjectGraph() {
+  public ObjectGraph getObjectGraph() {
     return objectGraph;
   }
 }
