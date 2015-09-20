@@ -23,100 +23,97 @@ import java.util.Set;
  */
 public class DaoManager {
 
-    /**
-     * A simple map to hold the references to a concrete {@link Dao}.
-     */
-    private Set<Dao> daos = new HashSet<>();
+  /**
+   * A simple map to hold the references to a concrete {@link Dao}.
+   */
+  private Set<Dao> daos = new HashSet<>();
 
-    private final String name;
-    private final int version;
-    private BriteDatabase db;
+  private final String name;
+  private final int version;
+  private BriteDatabase db;
 
-    public DaoManager(Context c, String databaseName, int version, Dao... daos) {
-        this(c, databaseName, version, null, null, daos);
+  public DaoManager(Context c, String databaseName, int version, Dao... daos) {
+    this(c, databaseName, version, null, null, daos);
+  }
+
+  public DaoManager(Context c, String databaseName, int version,
+      SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler, Dao... daos) {
+
+    OpenHelper openHelper = new OpenHelper(c, databaseName, factory, version, errorHandler);
+    db = SqlBrite.create().wrapDatabaseHelper(openHelper);
+    this.name = databaseName;
+    this.version = version;
+    for (Dao dao : daos) {
+      addDao(dao);
+    }
+  }
+
+  /**
+   * Get the database version
+   */
+  public int getVersion() {
+    return version;
+  }
+
+  /**
+   * Get the name
+   */
+  public String getName() {
+    return name;
+  }
+
+  /**
+   * Deletes the complete database file
+   */
+  public void delete(Context c) {
+    c.deleteDatabase(getName());
+  }
+
+  /**
+   * Close the database
+   *
+   * @throws IOException
+   */
+  public void close() throws IOException {
+    db.close();
+  }
+
+  /**
+   * Activate or deactivate logging
+   *
+   * @param enabled true if logging enabled, false if not.
+   */
+  public void setLogging(boolean enabled) {
+    db.setLoggingEnabled(enabled);
+  }
+
+  /**
+   * Adds an dao
+   */
+  private void addDao(Dao dao) {
+    dao.setSqlBriteDb(db);
+    daos.add(dao);
+  }
+
+  /**
+   * Internally used SqlOpenHelper
+   */
+  private class OpenHelper extends SQLiteOpenHelper {
+    public OpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
+        int version, DatabaseErrorHandler errorHandler) {
+      super(context, name, factory, version, errorHandler);
     }
 
-    public DaoManager(Context c, String databaseName, int version,
-                      SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler, Dao... daos) {
-
-        OpenHelper openHelper = new OpenHelper(c, databaseName, factory, version, errorHandler);
-        db = SqlBrite.create().wrapDatabaseHelper(openHelper);
-        this.name = databaseName;
-        this.version = version;
-        for (Dao dao : daos) {
-            addDao(dao);
-        }
+    @Override public void onCreate(SQLiteDatabase db) {
+      for (Dao d : daos) {
+        d.createTable(db);
+      }
     }
 
-    /**
-     * Get the database version
-     */
-    public int getVersion() {
-        return version;
+    @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+      for (Dao d : daos) {
+        d.onUpgrade(db, oldVersion, newVersion);
+      }
     }
-
-    /**
-     * Get the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Deletes the complete database file
-     */
-    public void delete(Context c) {
-        c.deleteDatabase(getName());
-    }
-
-    /**
-     * Close the database
-     *
-     * @throws IOException
-     */
-    public void close() throws IOException {
-        db.close();
-    }
-
-
-    /**
-     * Activate or deactivate logging
-     *
-     * @param enabled true if logging enabled, false if not.
-     */
-    public void setLogging(boolean enabled) {
-        db.setLoggingEnabled(enabled);
-    }
-
-    /**
-     * Adds an dao
-     */
-    private void addDao(Dao dao) {
-        dao.setSqlBriteDb(db);
-        daos.add(dao);
-    }
-
-    /**
-     * Internally used SqlOpenHelper
-     */
-    private class OpenHelper extends SQLiteOpenHelper {
-        public OpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
-                          int version, DatabaseErrorHandler errorHandler) {
-            super(context, name, factory, version, errorHandler);
-        }
-
-        @Override
-        public void onCreate(SQLiteDatabase db) {
-            for (Dao d : daos) {
-                d.createTable(db);
-            }
-        }
-
-        @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            for (Dao d : daos) {
-                d.onUpgrade(db, oldVersion, newVersion);
-            }
-        }
-    }
+  }
 }

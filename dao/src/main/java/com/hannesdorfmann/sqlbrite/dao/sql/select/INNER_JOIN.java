@@ -34,7 +34,6 @@ public class INNER_JOIN extends SqlChildNode {
    *
    * @param columns Example:
    * <code> "table1.col1 = table2.col1 AND table1.col2 = table2.col2" </code>
-   *
    * @return {@link ON}
    */
   public ON ON(String columns) {

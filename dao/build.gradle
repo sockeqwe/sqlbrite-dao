@@ -2,25 +2,26 @@ apply plugin: 'com.android.library'
 apply plugin: 'org.robolectric'
 
 android {
-  compileSdkVersion 23
-  buildToolsVersion "23.0.1"
+  compileSdkVersion rootProject.ext.compileSdkVersion
+  buildToolsVersion rootProject.ext.buildToolsVersion
+
+  compileOptions {
+    sourceCompatibility rootProject.ext.javaSourceCompatibility
+    targetCompatibility rootProject.ext.javaTargetCompatibility
+  }
 
   defaultConfig {
-    minSdkVersion 15
-    targetSdkVersion 23
+    minSdkVersion rootProject.ext.minSdk
+    targetSdkVersion rootProject.ext.targetSdk
+    versionName project.VERSION_NAME
     versionCode 1
-    versionName "1.0"
   }
+
   buildTypes {
     release {
       minifyEnabled false
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
-  }
-
-  compileOptions {
-    sourceCompatibility JavaVersion.VERSION_1_7
-    targetCompatibility JavaVersion.VERSION_1_7
   }
 }
 

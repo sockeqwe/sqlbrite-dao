@@ -39,7 +39,6 @@ public class FROM extends SqlCursorCompileableChildNode implements SqlCompileabl
     return new WHERE(this, condition);
   }
 
-
   // TODO find a better String formater lib
   /*
    * Adds a SQL WHERE clause

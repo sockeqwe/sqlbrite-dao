@@ -6,15 +6,13 @@ import static org.junit.Assert.assertEquals;
 
 public class DropViewIfExistsTest {
 
-	@Test
-	public void test() {
+  @Test public void test() {
 
-		for (int j = 0; j < 50; j++) {
-			String viewName = "view" + j;
+    for (int j = 0; j < 50; j++) {
+      String viewName = "view" + j;
 
-			assertEquals("DROP VIEW IF EXISTS " + viewName,
-					new DROP_VIEW_IF_EXISTS(viewName).asCompileableStatement().sql);
-		}
-
-	}
+      assertEquals("DROP VIEW IF EXISTS " + viewName,
+          new DROP_VIEW_IF_EXISTS(viewName).asCompileableStatement().sql);
+    }
+  }
 }

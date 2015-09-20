@@ -5,20 +5,17 @@ import android.database.sqlite.SQLiteDatabase;
 
 /**
  * The abstract implementation of a {@link SqlExecuteCompileable}
- * 
+ *
  * @author Hannes Dorfmann
- * 
  */
-public abstract class SqlExecuteCompileableChildNode extends
-		SqlCompileableChildNode implements SqlExecuteCompileable {
+public abstract class SqlExecuteCompileableChildNode extends SqlCompileableChildNode
+    implements SqlExecuteCompileable {
 
-	public SqlExecuteCompileableChildNode(SqlNode previous) {
-		super(previous);
-	}
+  public SqlExecuteCompileableChildNode(SqlNode previous) {
+    super(previous);
+  }
 
-	@Override
-	public void execute(SQLiteDatabase database) throws SQLException {
-		database.execSQL(asCompileableStatement().sql);
-	}
-
+  @Override public void execute(SQLiteDatabase database) throws SQLException {
+    database.execSQL(asCompileableStatement().sql);
+  }
 }

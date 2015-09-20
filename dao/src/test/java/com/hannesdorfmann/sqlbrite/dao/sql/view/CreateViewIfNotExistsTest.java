@@ -6,53 +6,48 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-
 public class CreateViewIfNotExistsTest {
 
-	@Test
-	public void test() {
+  @Test public void test() {
 
-		for (int j = 0; j < 10; j++) {
-			String viewName = "TableName" + j;
+    for (int j = 0; j < 10; j++) {
+      String viewName = "TableName" + j;
 
-			assertEquals("CREATE VIEW IF NOT EXISTS " + viewName,
-					new CREATE_VIEW_IF_NOT_EXISTS(viewName).getSql());
+      assertEquals("CREATE VIEW IF NOT EXISTS " + viewName,
+          new CREATE_VIEW_IF_NOT_EXISTS(viewName).getSql());
+    }
+  }
 
-		}
+  @Test public void testCreateViewAsSelect() {
 
-	}
+    int tests = 100;
+    int columns = 5;
 
-	@Test
-	public void testCreateViewAsSelect() {
+    for (int i = 0; i < tests; i++) {
 
-		int tests = 100;
-		int columns = 5;
+      String viewName = "MyView" + i;
 
-		for (int i = 0; i < tests; i++) {
+      SelectTest.Columns c = new SelectTest.Columns(columns);
+      String tableName = "table" + i;
+      String whereClause = "col1=val1 AND col2=val2";
+      String groupBy = "col" + i;
+      String having = "sum(col" + i + ") > " + (i * 100);
+      String limit = "" + i + ", " + (10 + i);
+      String orderBy = "col" + i + " DESC";
 
-			String viewName = "MyView" + i;
+      String sql = new CREATE_VIEW_IF_NOT_EXISTS(viewName).AS(new SELECT(c.columns).FROM(tableName)
+              .WHERE(whereClause)
+              .GROUP_BY(groupBy)
+              .HAVING(having)
+              .ORDER_BY(orderBy)
+              .LIMIT(limit)).asCompileableStatement().sql;
 
-			SelectTest.Columns c = new SelectTest.Columns(columns);
-			String tableName = "table" + i;
-			String whereClause = "col1=val1 AND col2=val2";
-			String groupBy = "col" + i;
-			String having = "sum(col" + i + ") > " + (i * 100);
-			String limit = "" + i + ", " + (10 + i);
-			String orderBy = "col" + i + " DESC";
+      String genSql =
+          "CREATE VIEW IF NOT EXISTS " + viewName + " AS " + c.sql + " FROM " + tableName
+              + " WHERE " + whereClause + " GROUP BY " + groupBy + " HAVING " + having
+              + " ORDER BY " + orderBy + " LIMIT " + limit;
 
-			String sql = new CREATE_VIEW_IF_NOT_EXISTS(viewName).AS(
-					new SELECT(c.columns).FROM(tableName).WHERE(whereClause)
-							.GROUP_BY(groupBy).HAVING(having).ORDER_BY(orderBy)
-							.LIMIT(limit)).asCompileableStatement().sql;
-
-			String genSql = "CREATE VIEW IF NOT EXISTS " + viewName + " AS "
-					+ c.sql + " FROM " + tableName + " WHERE " + whereClause
-					+ " GROUP BY " + groupBy + " HAVING " + having
-					+ " ORDER BY " + orderBy + " LIMIT " + limit;
-
-			assertEquals(sql, genSql);
-		}
-
-	}
-
+      assertEquals(sql, genSql);
+    }
+  }
 }

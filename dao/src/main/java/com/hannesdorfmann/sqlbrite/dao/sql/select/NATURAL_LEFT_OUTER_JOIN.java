@@ -107,9 +107,7 @@ public class NATURAL_LEFT_OUTER_JOIN extends SqlCursorCompileableChildNode {
   }
 
   /**
-   *
-   * @param tableToJoin
-   * @return
+   * @param tableToJoin The table name to join
    */
   public CROSS_JOIN CROSS_JOIN(String tableToJoin) {
     return new CROSS_JOIN(this, tableToJoin);

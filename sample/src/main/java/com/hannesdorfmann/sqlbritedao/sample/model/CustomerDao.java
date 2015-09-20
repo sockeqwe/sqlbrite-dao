@@ -1,10 +1,10 @@
-package com.hannesdorfmann.sqlbrite.dao.sample.model;
+package com.hannesdorfmann.sqlbritedao.sample.model;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import com.hannesdorfmann.sqlbrite.dao.Dao;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.Customer;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.CustomerMapper;
+import com.hannesdorfmann.sqlbritedao.sample.model.customer.Customer;
+import com.hannesdorfmann.sqlbritedao.sample.model.customer.CustomerMapper;
 import com.squareup.sqlbrite.SqlBrite;
 import java.util.List;
 import rx.Observable;
@@ -17,12 +17,8 @@ public class CustomerDao extends Dao {
 
   @Override public void createTable(SQLiteDatabase database) {
 
-    CREATE_TABLE(Customer.TABLE_NAME,
-        Customer.COL_ID + " INTEGER PRIMARY KEY NOT NULL",
-        Customer.COL_FIRSTNAME + " TEXT",
-        Customer.COL_LASTNAME + " TEXT")
-        .execute(database);
-
+    CREATE_TABLE(Customer.TABLE_NAME, Customer.COL_ID + " INTEGER PRIMARY KEY NOT NULL",
+        Customer.COL_FIRSTNAME + " TEXT", Customer.COL_LASTNAME + " TEXT").execute(database);
   }
 
   @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {

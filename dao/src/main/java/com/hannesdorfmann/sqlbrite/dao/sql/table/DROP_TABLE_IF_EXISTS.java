@@ -7,25 +7,22 @@ import com.hannesdorfmann.sqlbrite.dao.sql.SqlRootNode;
 
 /**
  * DROP a SQL Table
- * 
+ *
  * @author Hannes Dorfmann
- * 
  */
 public class DROP_TABLE_IF_EXISTS extends SqlRootNode implements SqlExecuteCompileable {
 
-	private final String sql;
+  private final String sql;
 
-	public DROP_TABLE_IF_EXISTS(String tableName) {
-		if (tableName == null)
-			throw new IllegalArgumentException("The table name is null");
+  public DROP_TABLE_IF_EXISTS(String tableName) {
+    if (tableName == null) throw new IllegalArgumentException("The table name is null");
 
-		sql = "DROP TABLE IF EXISTS " + tableName;
-	}
+    sql = "DROP TABLE IF EXISTS " + tableName;
+  }
 
-	@Override
-	public String getSql() {
-		return sql;
-	}
+  @Override public String getSql() {
+    return sql;
+  }
 
   @Override public CompileableStatement asCompileableStatement() {
     return new CompileableStatement(sql, null);
@@ -34,5 +31,4 @@ public class DROP_TABLE_IF_EXISTS extends SqlRootNode implements SqlExecuteCompi
   @Override public void execute(SQLiteDatabase database) throws SQLException {
     database.execSQL(asCompileableStatement().sql);
   }
-
 }

@@ -6,16 +6,12 @@ import static org.junit.Assert.assertEquals;
 
 public class HavingTest {
 
-	@Test
-	public void test() {
+  @Test public void test() {
 
-		for (int i = 0; i < 10; i++) {
-			String having = "sum(col" + i + ")";
+    for (int i = 0; i < 10; i++) {
+      String having = "sum(col" + i + ")";
 
-			assertEquals(" HAVING " + having, new HAVING(null, having).asCompileableStatement().sql);
-
-		}
-
-	}
-
+      assertEquals(" HAVING " + having, new HAVING(null, having).asCompileableStatement().sql);
+    }
+  }
 }

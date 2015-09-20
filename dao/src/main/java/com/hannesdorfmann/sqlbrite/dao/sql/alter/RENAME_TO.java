@@ -10,21 +10,19 @@ import com.hannesdorfmann.sqlbrite.dao.sql.SqlNode;
  * ALTER TABLE MyDatabase.MyTable RENAME TO MyDatabase.NewTableName
  * </code>
  * </p>
- * 
+ *
  * @author Hannes Dorfmann
- * 
  */
 public class RENAME_TO extends SqlExecuteCompileableChildNode {
 
-	private final String sql;
+  private final String sql;
 
-	public RENAME_TO(SqlNode previous, String renameTo) {
-		super(previous);
-		this.sql = " RENAME TO " + renameTo;
-	}
+  public RENAME_TO(SqlNode previous, String renameTo) {
+    super(previous);
+    this.sql = " RENAME TO " + renameTo;
+  }
 
-	@Override
-	public String getSql() {
-		return sql;
-	}
+  @Override public String getSql() {
+    return sql;
+  }
 }

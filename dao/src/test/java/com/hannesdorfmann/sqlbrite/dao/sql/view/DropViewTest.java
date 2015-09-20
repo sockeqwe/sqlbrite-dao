@@ -6,15 +6,12 @@ import static org.junit.Assert.assertEquals;
 
 public class DropViewTest {
 
-	@Test
-	public void test() {
+  @Test public void test() {
 
-		for (int j = 0; j < 50; j++) {
-			String viewName = "view" + j;
+    for (int j = 0; j < 50; j++) {
+      String viewName = "view" + j;
 
-			assertEquals("DROP VIEW " + viewName,
-					new DROP_VIEW(viewName).asCompileableStatement().sql);
-		}
-
-	}
+      assertEquals("DROP VIEW " + viewName, new DROP_VIEW(viewName).asCompileableStatement().sql);
+    }
+  }
 }

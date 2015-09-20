@@ -4,41 +4,40 @@ import java.util.Arrays;
 
 /**
  * A simple {@link User} just for unit testing
- * 
+ *
  * @author Hannes Dorfmann
- * 
  */
 public class User {
 
-	public long id;
+  public long id;
 
-	public String name;
+  public String name;
 
-	public int age;
+  public int age;
 
-	public double weight;
+  public double weight;
 
-	public byte[] blob;
+  public byte[] blob;
 
-	public void setId(long id) {
-		this.id = id;
-	}
+  public void setId(long id) {
+    this.id = id;
+  }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public void setAge(int age) {
-		this.age = age;
-	}
+  public void setAge(int age) {
+    this.age = age;
+  }
 
-	public void setWeight(double weight) {
-		this.weight = weight;
-	}
+  public void setWeight(double weight) {
+    this.weight = weight;
+  }
 
-	public void setBlob(byte[] blob) {
-		this.blob = blob;
-	}
+  public void setBlob(byte[] blob) {
+    this.blob = blob;
+  }
 
   @Override public boolean equals(Object o) {
     if (this == o) return true;

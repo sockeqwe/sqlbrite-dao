@@ -63,15 +63,14 @@ public abstract class Dao {
    *
    * @param db the database
    */
-  void setSqlBriteDb(BriteDatabase db){
-    this.db=db;
+  void setSqlBriteDb(BriteDatabase db) {
+    this.db = db;
   }
 
   /**
    * Calls {@link Transaction#yieldIfContendedSafely()}
    *
    * @return true or false
-   * @see Transaction#yieldIfContendedSafely()
    */
   protected boolean yieldIfContendedSafely() {
     return transaction.yieldIfContendedSafely();
@@ -203,8 +202,7 @@ public abstract class Dao {
       @NonNull final ContentValues values, final int conflictAlgorithm,
       @Nullable final String whereClause, @Nullable final String... whereArgs) {
 
-    return Observable.just(
-        db.update(table, values, conflictAlgorithm, whereClause, whereArgs));
+    return Observable.just(db.update(table, values, conflictAlgorithm, whereClause, whereArgs));
   }
 
   /**
@@ -305,7 +303,7 @@ public abstract class Dao {
    * {@link #COMMIT()} or {@link #ROLLBACK()}
    */
   public void BEGIN_TRANSACTION() {
-    transaction=db.newTransaction();
+    transaction = db.newTransaction();
   }
 
   /**

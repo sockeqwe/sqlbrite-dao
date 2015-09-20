@@ -1,4 +1,4 @@
-package com.hannesdorfmann.sqlbrite.dao.sample;
+package com.hannesdorfmann.sqlbritedao.sample;
 
 import android.app.Application;
 import dagger.ObjectGraph;

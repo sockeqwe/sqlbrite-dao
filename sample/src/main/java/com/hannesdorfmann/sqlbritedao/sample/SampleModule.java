@@ -1,8 +1,8 @@
-package com.hannesdorfmann.sqlbrite.dao.sample;
+package com.hannesdorfmann.sqlbritedao.sample;
 
 import android.content.Context;
 import com.hannesdorfmann.sqlbrite.dao.DaoManager;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.CustomerDao;
+import com.hannesdorfmann.sqlbritedao.sample.model.CustomerDao;
 import dagger.Module;
 import dagger.Provides;
 import javax.inject.Singleton;

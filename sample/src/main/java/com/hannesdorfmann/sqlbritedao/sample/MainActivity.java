@@ -1,4 +1,4 @@
-package com.hannesdorfmann.sqlbrite.dao.sample;
+package com.hannesdorfmann.sqlbritedao.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,9 +7,10 @@ import android.support.v7.widget.RecyclerView;
 import android.widget.EditText;
 import android.widget.Toast;
 import butterknife.Bind;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.CustomerDao;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.Customer;
+import com.hannesdorfmann.sqlbritedao.sample.model.CustomerDao;
+import com.hannesdorfmann.sqlbritedao.sample.model.customer.Customer;
 import java.util.List;
 import javax.inject.Inject;
 import rx.Subscriber;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
+    ButterKnife.bind(this);
     injectDependencies();
 
     adapter = new CustomerAdapter(this);

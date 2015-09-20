@@ -1,11 +1,11 @@
-package com.hannesdorfmann.sqlbrite.dao.sample;
+package com.hannesdorfmann.sqlbritedao.sample;
 
 import android.content.Context;
 import android.widget.TextView;
 import com.hannesdorfmann.annotatedadapter.annotation.ViewField;
 import com.hannesdorfmann.annotatedadapter.annotation.ViewType;
 import com.hannesdorfmann.annotatedadapter.support.recyclerview.SupportAnnotatedAdapter;
-import com.hannesdorfmann.sqlbrite.dao.sample.model.customer.Customer;
+import com.hannesdorfmann.sqlbritedao.sample.model.customer.Customer;
 import java.util.List;
 
 /**

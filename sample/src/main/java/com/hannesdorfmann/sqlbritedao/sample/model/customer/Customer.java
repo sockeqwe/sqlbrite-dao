@@ -1,8 +1,8 @@
-package com.hannesdorfmann.sqlbrite.dao.sample.model.customer;
+package com.hannesdorfmann.sqlbritedao.sample.model.customer;
 
-import com.hannesdorfmann.sqlbrite.dao.sample.model.Person;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.ObjectMappable;
+import com.hannesdorfmann.sqlbritedao.sample.model.Person;
 
 /**
  * @author Hannes Dorfmann
