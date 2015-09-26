@@ -59,24 +59,11 @@ For `Customer` a class called `CustomerMapper` gets generated that looks like th
 
 ```java
 public final class CustomerMapper {
-  private CustomerMapper() {
-  }
 
   /**
-   * Retrieves the first element from  Cursor by scanning for @Column annotated fields.
-   * @param cursor The Cursor
-   * @return null if Cursor is empty or a single Customer fetched from the cursor
+   * RxJava Func1 Method that can be used to generate a Customer from a Cursor's data (sql row)
    */
-  public static Customer single(Cursor cursor) {
-      ...
-  }
-
-  /**
-   * Fetches a list of {@link Customer } from a Cursor by scanning for @Column annotated fields.
-   * @param cursor The Cursor
-   * @return An empty List if cursor is empty or a list of items fetched from the cursor
-   */
-  public static List<Customer> list(Cursor cursor) {
+  public static final Func1<Cursor, Customer> MAPPER = new Func1<Cursor, Customer>() {
     ...
   }
 
@@ -92,7 +79,7 @@ public final class CustomerMapper {
 }
 ```
 
-So basically it generates code for iterating over a `Cursor` (cursor gets closed internally and resources released) and retrieve fetch data by calling `cursor.getString(index)` and so on.
+So basically it generates a `Func1` that can be applied on a SQLBrite `QueryObservable` to instantiate your data object (i.e. Customer) out of a `Cursor` (cursor gets closed internally and resources released by SQLBrite) and retrieve fetch data by calling `cursor.getString(index)` and so on.
 
 ```java
 Cursor c = ... ; // Some SQL SELECT statement
@@ -169,20 +156,14 @@ public class CustomerDao extends Dao {
 
   public Observable<List<Customer>> getCustomers(String lastname) {
       return query(
-
         SELECT(Customer.COL_ID, Customer.COL_FIRSTNAME, Customer.COL_LASTNAME)
         .FROM(Customer.TABLE_NAME)
-        .WHERE(Customer.COL_LASTNAME + " = ? "),
-
-        lastname) // Argument that replaces "?" in WHERE
-
-       .map(new Func1<SqlBrite.Query, List<Customer>>() {  // Converts SqlBrite.Query to List<Customer>
-
-        @Override public List<Customer> call(SqlBrite.Query query) {
-          Cursor cursor = query.run();
-          return CustomerMapper.list(cursor);  // Generated Mapper class, already discussed above
-        }
-      });
+        .WHERE(Customer.COL_LASTNAME + " = ? ")
+       )
+       .args(lastname) // arguments that replace the "?" placeholders in SQL statement
+       .run() // Executes query
+       .mapToList(CustomerMapper.MAPPER) // Use the generated Func1 method
+      );
     }
 
 
@@ -227,4 +208,19 @@ compile 'com.hannesdorfmann.sqlbrite:annotations:xxx'
 apt 'com.hannesdorfmann.sqlbrite:object-mapper:xxx'
 ```
 To run annotation processing you have to use [apt](https://bitbucket.org/hvisser/android-apt).
-Please note that DAO and Object-Mapper are independent. You can choose whether you want to use both or not. You could also use Object-Mapper without using SQLBrite at all (since it only a takes `Cursor` and fills your annotated model object with data).
+Please note that DAO and Object-Mapper are independent. You can choose whether you want to use both or not. 
+
+## License
+Copyright 2015 Hannes Dorfmann
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
