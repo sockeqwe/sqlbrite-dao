@@ -3,7 +3,7 @@ package com.hannesdorfmann.sqlbrite.objectmapper.processor;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.CodeGenerator;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.method.MethodCodeFactory;
-import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import javax.lang.model.element.ExecutableElement;
@@ -19,6 +19,7 @@ public class ColumnAnnotatedMethod implements ColumnAnnotateable {
   private ExecutableElement method;
   private String columnName;
   private CodeGenerator codeGenerator;
+  private boolean throwOnColumnIndexNotFound;
 
   public ColumnAnnotatedMethod(ExecutableElement method, Column annotation)
       throws ProcessingException {
@@ -42,12 +43,13 @@ public class ColumnAnnotatedMethod implements ColumnAnnotateable {
           method.getSimpleName().toString(), method.getEnclosingElement().toString());
     }
 
+    throwOnColumnIndexNotFound = annotation.throwOnColumnIndexNotFound();
     this.method = method;
 
     codeGenerator = MethodCodeFactory.get(this);
   }
 
-  @Override public void generateAssignStatement(MethodSpec.Builder builder, String objectVarName,
+  @Override public void generateAssignStatement(CodeBlock.Builder builder, String objectVarName,
       String cursorVarName, String indexVarName) {
 
     codeGenerator.generateAssignStatement(builder, objectVarName, cursorVarName, indexVarName);
@@ -78,8 +80,12 @@ public class ColumnAnnotatedMethod implements ColumnAnnotateable {
     return method.getParameters().get(0);
   }
 
-  @Override public void generateContentValuesBuilderMethod(TypeSpec.Builder builder,
-      TypeName type, String contentValuesVarName) {
+  @Override public void generateContentValuesBuilderMethod(TypeSpec.Builder builder, TypeName type,
+      String contentValuesVarName) {
     codeGenerator.generateContentValuesBuilderMethod(builder, type, contentValuesVarName);
+  }
+
+  @Override public boolean isThrowOnColumnIndexNotFound() {
+    return throwOnColumnIndexNotFound;
   }
 }

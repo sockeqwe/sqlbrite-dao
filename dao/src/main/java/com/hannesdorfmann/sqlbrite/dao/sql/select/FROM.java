@@ -1,8 +1,10 @@
 package com.hannesdorfmann.sqlbrite.dao.sql.select;
 
+import android.support.annotation.NonNull;
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlCursorCompileableChildNode;
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlNode;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -15,10 +17,33 @@ public class FROM extends SqlCursorCompileableChildNode implements SqlCompileabl
   private final String sql;
   private final Set<String> affectedTables;
 
-  public FROM(SqlNode previous, String tableName) {
+  public FROM(SqlNode previous, @NonNull String tableName) {
     super(previous);
     this.sql = " FROM " + tableName;
     this.affectedTables = Collections.singleton(tableName);
+  }
+
+  public FROM(SqlNode previous, @NonNull String... tableNames) {
+    super(previous);
+
+    if (tableNames == null) {
+      throw new NullPointerException("Table name(s) is null! FROM(null) is not allowed!");
+    }
+
+    StringBuffer fromSql = new StringBuffer(" FROM ");
+    affectedTables = new HashSet<>();
+
+    for (int i = 0; i < tableNames.length; i++) {
+
+      affectedTables.add(tableNames[i]);
+
+      if (i > 0) {
+        fromSql.append(", ");
+      }
+      fromSql.append(tableNames[i]);
+    }
+
+    this.sql = fromSql.toString();
   }
 
   @Override public String getSql() {

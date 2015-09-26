@@ -22,4 +22,11 @@ public @interface Column {
    * @return The column name
    */
   String value();
+
+  /**
+   * Throw an exception if the column name has not been in the sql cursor
+   *
+   * @return true if an exception should be thrown, false if not
+   */
+  boolean throwOnColumnIndexNotFound() default true;
 }

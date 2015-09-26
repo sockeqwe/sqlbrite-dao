@@ -2,6 +2,7 @@ package com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.method;
 
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.ColumnAnnotatedMethod;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.CodeGenerator;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -22,7 +23,7 @@ public class MethodCodeGenerator implements CodeGenerator {
     this.cursorMethodName = cursorMethodName;
   }
 
-  @Override public void generateAssignStatement(MethodSpec.Builder builder, String objectVarName,
+  @Override public void generateAssignStatement(CodeBlock.Builder builder, String objectVarName,
       String cursorVarName, String indexVarName) {
 
     builder.addStatement("$L.$L( $L.$L( $L ) )", objectVarName, method.getMethodName(),

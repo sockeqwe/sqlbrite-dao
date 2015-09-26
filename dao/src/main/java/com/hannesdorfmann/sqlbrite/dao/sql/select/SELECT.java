@@ -1,5 +1,6 @@
 package com.hannesdorfmann.sqlbrite.dao.sql.select;
 
+import android.support.annotation.NonNull;
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlRootNode;
 
 /**
@@ -16,8 +17,12 @@ public class SELECT extends SqlRootNode {
    *
    * @param columns The list of columns, pass * for selecting all columns
    */
-  public SELECT(String... columns) {
+  public SELECT(@NonNull String... columns) {
 
+    if (columns == null) {
+      throw new NullPointerException("SELECT: Columns are null");
+    }
+    
     if (columns.length == 0) throw new IllegalArgumentException("At least on column is required");
 
     StringBuilder builder = new StringBuilder("SELECT ");
@@ -42,7 +47,11 @@ public class SELECT extends SqlRootNode {
    * @param tableName The table name
    * @return FROM
    */
-  public FROM FROM(String tableName) {
+  public FROM FROM(@NonNull String tableName) {
     return new FROM(this, tableName);
+  }
+
+  public FROM FROM(@NonNull String... tableNames) {
+    return new FROM(this, tableNames);
   }
 }

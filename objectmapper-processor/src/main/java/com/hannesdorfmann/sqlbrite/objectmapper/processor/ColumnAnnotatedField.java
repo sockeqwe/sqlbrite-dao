@@ -3,7 +3,7 @@ package com.hannesdorfmann.sqlbrite.objectmapper.processor;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.CodeGenerator;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.field.FieldCodeFactory;
-import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import javax.lang.model.element.Modifier;
@@ -18,6 +18,7 @@ public class ColumnAnnotatedField implements ColumnAnnotateable {
   private VariableElement field;
   private String columnName;
   private CodeGenerator codeGenerator;
+  private boolean throwOnColumnIndexNotFound;
 
   /**
    * Creates a new instance
@@ -55,6 +56,8 @@ public class ColumnAnnotatedField implements ColumnAnnotateable {
       throw new ProcessingException(field, "The column name is unspecified for field %s",
           field.getSimpleName().toString());
     }
+
+    throwOnColumnIndexNotFound = annotation.throwOnColumnIndexNotFound();
 
     // OK field is defined as expected
     this.field = field;
@@ -100,7 +103,7 @@ public class ColumnAnnotatedField implements ColumnAnnotateable {
     return typeElement.getQualifiedName().toString();
   }
 
-  @Override public void generateAssignStatement(MethodSpec.Builder builder, String objectVarName,
+  @Override public void generateAssignStatement(CodeBlock.Builder builder, String objectVarName,
       String cursorVarName, String indexVarName) {
 
     codeGenerator.generateAssignStatement(builder, objectVarName, cursorVarName, indexVarName);
@@ -114,5 +117,9 @@ public class ColumnAnnotatedField implements ColumnAnnotateable {
 
   @Override public String getElementName() {
     return field.toString();
+  }
+
+  @Override public boolean isThrowOnColumnIndexNotFound() {
+    return throwOnColumnIndexNotFound;
   }
 }

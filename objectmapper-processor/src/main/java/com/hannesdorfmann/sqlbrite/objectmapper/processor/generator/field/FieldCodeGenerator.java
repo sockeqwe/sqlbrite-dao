@@ -2,6 +2,7 @@ package com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.field;
 
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.ColumnAnnotatedField;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.CodeGenerator;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
@@ -22,7 +23,7 @@ public class FieldCodeGenerator implements CodeGenerator {
     this.field = field;
   }
 
-  @Override public void generateAssignStatement(MethodSpec.Builder builder, String objectVarName,
+  @Override public void generateAssignStatement(CodeBlock.Builder builder, String objectVarName,
       String cursorVarName, String indexVarName) {
     builder.addStatement("$L.$L = $L.$L($L)", objectVarName, field.getFieldName(), cursorVarName,
         cursorMethodName, indexVarName);

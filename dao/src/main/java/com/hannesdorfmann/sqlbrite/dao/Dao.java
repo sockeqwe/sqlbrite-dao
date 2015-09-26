@@ -17,9 +17,8 @@ import com.hannesdorfmann.sqlbrite.dao.sql.view.CREATE_VIEW_IF_NOT_EXISTS;
 import com.hannesdorfmann.sqlbrite.dao.sql.view.DROP_VIEW;
 import com.hannesdorfmann.sqlbrite.dao.sql.view.DROP_VIEW_IF_EXISTS;
 import com.squareup.sqlbrite.BriteDatabase;
-import com.squareup.sqlbrite.SqlBrite;
-import java.util.HashSet;
-import java.util.Set;
+import com.squareup.sqlbrite.QueryObservable;
+import java.util.Collections;
 import rx.Observable;
 
 import static com.squareup.sqlbrite.BriteDatabase.Transaction;
@@ -30,6 +29,80 @@ import static com.squareup.sqlbrite.BriteDatabase.Transaction;
  * @author Hannes Dorfmann
  */
 public abstract class Dao {
+
+  /**
+   * Builder pattern to build a query.
+   */
+  protected class QueryBuilder {
+
+    String rawStatement;
+    Iterable<String> rawStatementAffectedTables;
+    SqlFinishedStatement statement;
+    String[] args;
+    boolean autoUpdate = true;
+
+    public QueryBuilder(@Nullable Iterable<String> rawStatementAffectedTables,
+        @NonNull String rawStatement) {
+
+      if (rawStatement == null) {
+        throw new NullPointerException("Raw SQL Query Statement is null");
+      }
+
+      this.rawStatement = rawStatement;
+      this.rawStatementAffectedTables = rawStatementAffectedTables;
+      this.autoUpdate =
+          rawStatementAffectedTables != null && rawStatementAffectedTables.iterator().hasNext();
+    }
+
+    private QueryBuilder(@NonNull SqlFinishedStatement statement) {
+      if (statement == null) {
+        throw new NullPointerException("Statment is null!");
+      }
+      this.statement = statement;
+    }
+
+    /**
+     * Set the arguments used for the prepared statement
+     *
+     * @param args The strings used to replace "?" in the SELECT query statement
+     * @return The QueryBuilder itself
+     */
+    public QueryBuilder args(String... args) {
+      this.args = args;
+      return this;
+    }
+
+    /**
+     * Registers this query for automatically updates through SQLBrite. SQLBrite offers a mechanism
+     * to get notified on data changes on the queried database table (like insert, update or delete
+     * rows) and automatically rerun this query. Per default this feature is enabled.
+     *
+     * @param autoUpdate true to enable, false to disable.
+     * @return The QueryBuilder itself
+     */
+    public QueryBuilder autoUpdates(boolean autoUpdate) {
+      this.autoUpdate = autoUpdate;
+
+      // Using raw statement, but no table to observe specified
+      if (autoUpdate && statement == null && (rawStatementAffectedTables == null
+          || !rawStatementAffectedTables.iterator().hasNext())) {
+        throw new RuntimeException("You try to set autoUpdates(true) but, "
+            + "your raw sql query statement has not specified which tables are affected by this query. Hence autoUpdates can not be enabled! Specify the affected tables as second parameter of rawQuery(String rawSQL, String ... affectedTables) method.");
+      }
+
+      return this;
+    }
+
+    /**
+     * Executes the query and returns an {@code QueryObservable}
+     *
+     * @return {@code QueryObservable}
+     * @see QueryObservable
+     */
+    public QueryObservable run() {
+      return executeQuery(this);
+    }
+  }
 
   protected BriteDatabase db;
 
@@ -73,64 +146,77 @@ public abstract class Dao {
   }
 
   /**
-   * Execute a query. Automatically registers itself for updates (trigger)
+   * Creates a query.
    *
    * @param statement the sql statement
-   * @param args the arguments
-   * @return Observable of the query
+   * @return QueryBuilder to proceed query building
    */
-  protected Observable<SqlBrite.Query> query(SqlFinishedStatement statement, String... args) {
-    return query(statement, true, args);
+  protected QueryBuilder query(@NonNull SqlFinishedStatement statement) {
+    return new QueryBuilder(statement);
   }
 
   /**
-   * Executes a SQL query
+   * Creates a raw query and enables auto updates for the given tables
    *
-   * @param statement the SQL Statement
-   * @param triggerAffectedTableUpdates true, if updates should be triggered automatically, false
-   * if
-   * no update should be triggered.
-   * @param args The arguments of the SQL statement
-   * @return Observable of the query
+   * @param tables The affected table. updates get triggered if the observed tables changes. Use
+   * {@code null} or
+   * {@link #rawQuery(String)} if you don't want to register for automatic updates
+   * @param sql The sql query statement
+   * @return Observable of this query
    */
-  protected Observable<SqlBrite.Query> query(SqlFinishedStatement statement,
-      boolean triggerAffectedTableUpdates, String... args) {
+  protected QueryBuilder rawQueryOnManyTables(@Nullable final Iterable<String> tables,
+      @NonNull final String sql) {
+    return new QueryBuilder(tables, sql);
+  }
 
-    SqlCompileable.CompileableStatement compileableStatement = statement.asCompileableStatement();
-    Set<String> affectedTables =
-        compileableStatement.tables == null ? new HashSet<String>() : compileableStatement.tables;
+  /**
+   * Creates a raw query and enables auto updates for the given single table
+   *
+   * @param table the affected table. updates get triggered if the observed tables changes. Use
+   * {@code null} or
+   * {@link #rawQuery(String)} if you don't want to register for automatic updates
+   * @param sql The sql query statement
+   */
+  protected QueryBuilder rawQuery(@Nullable final String table, @NonNull String sql) {
+    return rawQueryOnManyTables(table == null ? null : Collections.singleton(table), sql);
+  }
 
-    if (!triggerAffectedTableUpdates) {
-      affectedTables = new HashSet<>();
+  /**
+   * Creates a raw query. AutoUpdates are disabled since the name of the table to observe are not
+   * specified.
+   *
+   * @param sql The raw SQL query statement. Arguments can still be specified with "?" as
+   * placeholder
+   */
+  protected QueryBuilder rawQuery(@NonNull String sql) {
+    return rawQueryOnManyTables(null, sql);
+  }
+
+  /**
+   * Executes the a query
+   */
+  private QueryObservable executeQuery(QueryBuilder queryBuilder) {
+
+    // Raw query properties as default
+    String sql = queryBuilder.rawStatement;
+    Iterable<String> affectedTables = queryBuilder.rawStatementAffectedTables;
+
+    // If SqlFinishedStatement is set then use that one
+    if (queryBuilder.statement != null) {
+
+      SqlCompileable.CompileableStatement compileableStatement =
+          queryBuilder.statement.asCompileableStatement();
+
+      sql = compileableStatement.sql;
+      affectedTables = compileableStatement.tables;
     }
 
-    return rawQuery(affectedTables, compileableStatement.sql, args);
-  }
+    // Check for auto update
+    if (!queryBuilder.autoUpdate || affectedTables == null) {
+      affectedTables = Collections.emptySet();
+    }
 
-  /**
-   * Exceutes a raw query
-   *
-   * @param tables The affected table updates get triggered if the observer table changes
-   * @param sql The sql query statement
-   * @param args the sql query args
-   * @return Observable of this query
-   */
-  protected Observable<SqlBrite.Query> rawQuery(@NonNull final Iterable<String> tables,
-      @NonNull String sql, @NonNull String... args) {
-    return db.createQuery(tables, sql, args);
-  }
-
-  /**
-   * Creates a raw sql query
-   *
-   * @param table The affected table updates get triggered if the observer table changes
-   * @param sql The sql query statement
-   * @param args the sql query args
-   * @return Observable of this query
-   */
-  protected Observable<SqlBrite.Query> rawQuery(@NonNull final String table, @NonNull String sql,
-      @NonNull String... args) {
-    return db.createQuery(table, sql, args);
+    return db.createQuery(affectedTables, sql, queryBuilder.args);
   }
 
   /**
@@ -218,6 +304,7 @@ public abstract class Dao {
    * @param columns The columsn to select
    * @return {@link SELECT}
    */
+
   protected SELECT SELECT(String... columns) {
     return new SELECT(columns);
   }

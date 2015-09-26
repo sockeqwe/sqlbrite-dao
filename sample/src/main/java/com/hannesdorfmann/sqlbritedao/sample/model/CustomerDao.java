@@ -5,10 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import com.hannesdorfmann.sqlbrite.dao.Dao;
 import com.hannesdorfmann.sqlbritedao.sample.model.customer.Customer;
 import com.hannesdorfmann.sqlbritedao.sample.model.customer.CustomerMapper;
-import com.squareup.sqlbrite.SqlBrite;
 import java.util.List;
 import rx.Observable;
-import rx.functions.Func1;
 
 /**
  * @author Hannes Dorfmann
@@ -27,12 +25,7 @@ public class CustomerDao extends Dao {
 
   public Observable<List<Customer>> getCustomers() {
     return query(SELECT(Customer.COL_ID, Customer.COL_FIRSTNAME, Customer.COL_LASTNAME).FROM(
-        Customer.TABLE_NAME)).map(new Func1<SqlBrite.Query, List<Customer>>() {
-      @Override public List<Customer> call(SqlBrite.Query query) {
-
-        return CustomerMapper.list(query.run());
-      }
-    });
+        Customer.TABLE_NAME)).run().mapToList(CustomerMapper.MAPPER);
   }
 
   public Observable<Long> insert(int id, String firstname, String lastname) {

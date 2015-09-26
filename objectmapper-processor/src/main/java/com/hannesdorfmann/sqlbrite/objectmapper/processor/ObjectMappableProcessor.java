@@ -6,6 +6,8 @@ import com.google.auto.service.AutoService;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.ObjectMappable;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -31,6 +33,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
+import rx.functions.Func1;
 
 @AutoService(Processor.class) public class ObjectMappableProcessor extends AbstractProcessor {
 
@@ -143,21 +146,13 @@ import javax.tools.Diagnostic;
 
       String packageName = getPackageName(clazz);
 
-      MethodSpec listMethod = generateListMethod(clazz);
-      MethodSpec simpleListMethod = generateSimpleListMethod(clazz);
-      MethodSpec singleMethod = generateSingleMethod(clazz);
-      MethodSpec simpleSingleMethod = generateSimpleSingleMethod(clazz);
-
       // Generate the mapper class
       TypeSpec mapperClass = TypeSpec.classBuilder(clazz.getSimpleClassName() + "Mapper")
           .addJavadoc("Generated class to work with Cursors and ContentValues for $T\n",
               ClassName.get(clazz.getElement()))
           .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
           .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
-          .addMethod(simpleSingleMethod)
-          .addMethod(singleMethod)
-          .addMethod(simpleListMethod)
-          .addMethod(listMethod)
+          .addField(generateRxMappingMethod(clazz))
           .addMethod(generateContentValuesMethod(clazz, "ContentValuesBuilder"))
           .addType(generateContentValuesBuilderClass(clazz, "ContentValuesBuilder"))
           .build();
@@ -167,195 +162,68 @@ import javax.tools.Diagnostic;
   }
 
   /**
-   * Generates the method to create retrieve a List of items from cursor that only takes one cursor
-   * as parameter and internally calls the method generate by {@link #generateListMethod(ObjectMappableAnnotatedClass)}
-   * with true as throwOnIndexNotFound parameter
-   *
-   * @param clazz {@link ObjectMappableAnnotatedClass}
-   * @return The MethodSpec
-   */
-  private MethodSpec generateSimpleListMethod(ObjectMappableAnnotatedClass clazz) {
-
-    String cursorVarName = "cursor";
-    ClassName list = ClassName.get("java.util", "List");
-    TypeName elementType = ClassName.get(clazz.getElement().asType());
-    TypeName typedList = ParameterizedTypeName.get(list, elementType);
-
-    // List Method
-    return MethodSpec.methodBuilder("list")
-        .addJavadoc(
-            "Fetches a list of {@link $T } from a Cursor by scanning for $L annotated fields. "
-                + "Calls {@link #list(Cursor,boolean)} with true as second parameter \n",
-            ClassName.get(clazz.getElement()), "@" + Column.class.getSimpleName())
-        .addJavadoc("@param $L The Cursor \n", cursorVarName)
-        .addJavadoc(
-            "@return An empty List if cursor is empty or a list of items fetched from the cursor\n")
-        .addJavadoc("@see #list(Cursor,boolean)\n")
-        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-        .addParameter(Cursor.class, cursorVarName)
-        .returns(typedList)
-        .addStatement("return list($L, true)", cursorVarName)
-        .build();
-  }
-
-  /**
-   * Generates the method that takes a cursor and a boolean flag as parameter and returns a list of
-   * Items
-   *
-   * @param clazz The {@link ObjectMappableAnnotatedClass}
-   * @return The MethodSpec
-   */
-  private MethodSpec generateListMethod(ObjectMappableAnnotatedClass clazz) {
-
-    String listVarName = "list";
-    String objectVarName = "item";
-    String cursorVarName = "cursor";
-    String throwOnIndexNotFoundVarName = "throwOnIndexNotFound";
-
-    ClassName list = ClassName.get("java.util", "List");
-    ClassName arrayList = ClassName.get("java.util", "ArrayList");
-
-    TypeName elementType = ClassName.get(clazz.getElement().asType());
-
-    TypeName typedArrayList = ParameterizedTypeName.get(arrayList, elementType);
-    TypeName typedList = ParameterizedTypeName.get(list, elementType);
-
-    // List Method
-    MethodSpec.Builder listMethod = MethodSpec.methodBuilder("list")
-        .addJavadoc(
-            "Fetches a list of {@link $T } from a Cursor by scanning for $L annotated fields\n",
-            ClassName.get(clazz.getElement()), "@" + Column.class.getSimpleName())
-        .addJavadoc("@param $L The Cursor", cursorVarName)
-        .addJavadoc(
-            "@param $L <b>true</b>, if an {@link IllegalArgumentException} should be thrown if the"
-                + " column doesn't exist. <b>false</b> if missing columns should be skipped\n",
-            throwOnIndexNotFoundVarName)
-        .addJavadoc(
-            "@return An empty List if cursor is empty or a list of items fetched from the cursor\n")
-        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-        .addParameter(Cursor.class, cursorVarName)
-        .addParameter(boolean.class, throwOnIndexNotFoundVarName)
-        .returns(typedList)
-        .beginControlFlow("try")
-        .beginControlFlow("if ($L == null || $L.getCount() == 0 || !$L.moveToFirst()) ",
-            cursorVarName, cursorVarName, cursorVarName)
-        .addStatement("return new $T(0)", typedArrayList)
-        .endControlFlow();
-
-    generateColumnIndexCode(listMethod, clazz.getColumnAnnotatedElements(), cursorVarName,
-        throwOnIndexNotFoundVarName);
-
-    listMethod.addStatement("$T $L = new $T($L.getCount())", typedList, listVarName, typedArrayList,
-        cursorVarName)
-        .addCode("do {\n")
-        .addStatement("$T $L = new $T()", elementType, objectVarName, elementType);
-
-    for (ColumnAnnotateable e : clazz.getColumnAnnotatedElements()) {
-      String indexVaName = e.getColumnName() + "Index";
-      listMethod.beginControlFlow("if ($L >= 0)", indexVaName);
-      e.generateAssignStatement(listMethod, objectVarName, cursorVarName, indexVaName);
-      listMethod.endControlFlow();
-    }
-
-    listMethod.addStatement("$L.add($L)", listVarName, objectVarName)
-        .addCode("} while ($L.moveToNext());\n", cursorVarName).addStatement("return $L",
-        listVarName)
-
-        // end try
-        .nextControlFlow("finally")
-        .beginControlFlow("if ($L != null)", cursorVarName)
-        .addStatement("$L.close()", cursorVarName)
-        .endControlFlow()
-        .endControlFlow(); // end try
-
-    return listMethod.build();
-  }
-
-  /**
-   * Generates the method to create retrieve a List of items from cursor that only takes one cursor
-   * as parameter and internally calls the method generate by {@link #generateListMethod(ObjectMappableAnnotatedClass)}
-   * with true as throwOnIndexNotFound parameter
-   *
-   * @param clazz {@link ObjectMappableAnnotatedClass}
-   * @return The MethodSpec
-   */
-  private MethodSpec generateSimpleSingleMethod(ObjectMappableAnnotatedClass clazz) {
-
-    String cursorVarName = "cursor";
-    TypeName elementType = ClassName.get(clazz.getElement().asType());
-
-    // List Method
-    return MethodSpec.methodBuilder("single")
-
-        .addJavadoc(
-            "Retrieves the first element from  Cursor by scanning for $L annotated fields. Calls {@link #single(Cursor,boolean)} with true as second parameter\n",
-            "@" + Column.class.getSimpleName())
-        .addJavadoc("@param $L The Cursor\n", cursorVarName)
-        .addJavadoc("@return null if Cursor is empty or  a single item fetched from the cursor\n")
-        .addJavadoc("@see #single(Cursor,boolean)\n")
-        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-        .addParameter(Cursor.class, cursorVarName)
-        .returns(elementType)
-        .addStatement("return single($L, true)", cursorVarName)
-        .build();
-  }
-
-  /**
-   * Generates the method that fetches only one single Item (the first) from cursor
+   * Generates the field that can be used as RxJava method
    *
    * @param clazz The {@link ObjectMappableAnnotatedClass}
    * @return MethodSpec
    */
-  private MethodSpec generateSingleMethod(ObjectMappableAnnotatedClass clazz) {
+  private FieldSpec generateRxMappingMethod(ObjectMappableAnnotatedClass clazz) {
 
     String objectVarName = "item";
     String cursorVarName = "cursor";
-    String throwOnIndexNotFoundVarName = "throwOnIndexNotFound";
 
     TypeName elementType = ClassName.get(clazz.getElement().asType());
 
-    // List Method
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("single")
-        .addJavadoc(
-            "Retrieves the first element from  Cursor by scanning for $L annotated fields \n",
-            "@" + Column.class.getSimpleName())
-        .addJavadoc("@param $L The Cursor\n", cursorVarName)
-        .addJavadoc(
-            "@param $L <b>true</b>, if an {@link IllegalArgumentException} should be thrown if "
-                + "the column doesn't exist. <b>false</b> if missing columns should be skipped\n",
-            throwOnIndexNotFoundVarName)
-        .addJavadoc(
-            "@return The fetched item from Cursor or <code>null</code> if cursor is empty\n")
-        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-        .addParameter(Cursor.class, cursorVarName)
-        .addParameter(boolean.class, throwOnIndexNotFoundVarName)
-        .returns(elementType)
-        .beginControlFlow("try")
-        .beginControlFlow("if ($L == null || $L.getCount() == 0 || !$L.moveToFirst()) ",
-            cursorVarName, cursorVarName, cursorVarName)
-        .addStatement("return null")
-        .endControlFlow();
+    // new Func1<Cursor, ListsItem>()
 
-    generateColumnIndexCode(builder, clazz.getColumnAnnotatedElements(), cursorVarName,
-        throwOnIndexNotFoundVarName);
+    CodeBlock.Builder initBlockBuilder = CodeBlock.builder()
+        .add("new $L<$L, $L>() {\n", Func1.class.getSimpleName(), Cursor.class.getSimpleName(),
+            clazz.getSimpleClassName())
+        .indent()
+        .add("@Override public $L call($L cursor) {\n", clazz.getSimpleClassName(),
+            Cursor.class.getSimpleName())
+        .indent();
 
-    builder.addStatement("$T $L = new $T()", elementType, objectVarName, elementType);
+    // assign the columns indexes
+    generateColumnIndexCode(initBlockBuilder, clazz.getColumnAnnotatedElements(), cursorVarName);
 
+    // Instantiate element
+    initBlockBuilder.addStatement("$T $L = new $T()", elementType, objectVarName, elementType);
+
+    // read cursor into element variable
     for (ColumnAnnotateable e : clazz.getColumnAnnotatedElements()) {
       String indexVaName = e.getColumnName() + "Index";
-      builder.beginControlFlow("if ($L >= 0)", indexVaName);
-      e.generateAssignStatement(builder, objectVarName, cursorVarName, indexVaName);
-      builder.endControlFlow();
+      initBlockBuilder.beginControlFlow("if ($L >= 0)", indexVaName);
+      e.generateAssignStatement(initBlockBuilder, objectVarName, cursorVarName, indexVaName);
+      initBlockBuilder.endControlFlow();
     }
 
-    builder.addStatement("return $L", objectVarName)
-        .nextControlFlow("finally")
-        .beginControlFlow("if ($L != null)", cursorVarName)
-        .addStatement("$L.close()", cursorVarName)
-        .endControlFlow()
-        .endControlFlow(); // end finally
+    initBlockBuilder.addStatement("return $L", objectVarName).unindent().add(
+        "}\n") // end call () method
+        .unindent().add("}") // end anonymous class
+        .build();
 
-    return builder.build();
+    ParameterizedTypeName fieldType =
+        ParameterizedTypeName.get(ClassName.get(Func1.class), ClassName.get(Cursor.class),
+            elementType);
+
+    return FieldSpec.builder(fieldType, "MAPPER", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+        .initializer(initBlockBuilder.build())
+        .build();
+  }
+
+  private void generateColumnIndexCode(CodeBlock.Builder builder,
+      Collection<ColumnAnnotateable> elements, String cursorVarName) {
+
+    for (ColumnAnnotateable e : elements) {
+      if (e.isThrowOnColumnIndexNotFound()) {
+        builder.addStatement("int $LIndex = $L.getColumnIndexOrThrow($S)", e.getColumnName(),
+            cursorVarName, e.getColumnName());
+      } else {
+        builder.addStatement("int $LIndex = $L.getColumnIndex($S)", e.getColumnName(),
+            cursorVarName, e.getColumnName());
+      }
+    }
   }
 
   /**
@@ -368,7 +236,7 @@ import javax.tools.Diagnostic;
    * @param throwOnIndexNotFoundVarName The variable name of the boolean variable to check if
    * <i>getColumnIndexOrThrow</i> should be used
    */
-  private void generateColumnIndexCode(MethodSpec.Builder builder,
+  @Deprecated private void generateColumnIndexCode(MethodSpec.Builder builder,
       Collection<ColumnAnnotateable> elements, String cursorVarName,
       String throwOnIndexNotFoundVarName) {
 

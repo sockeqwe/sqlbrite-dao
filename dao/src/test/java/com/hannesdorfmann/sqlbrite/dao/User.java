@@ -1,4 +1,4 @@
-package com.hannesdorfmann.sqlbrite.dao.sql.testdao;
+package com.hannesdorfmann.sqlbrite.dao;
 
 import java.util.Arrays;
 

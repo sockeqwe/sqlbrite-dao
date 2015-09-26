@@ -1,8 +1,7 @@
 package com.hannesdorfmann.sqlbrite.dao;
 
 import android.content.Context;
-import com.hannesdorfmann.sqlbrite.dao.sql.testdao.User;
-import com.hannesdorfmann.sqlbrite.dao.sql.testdao.UserDao;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
@@ -15,15 +14,15 @@ import static org.junit.Assert.assertEquals;
 @RunWith(RobolectricTestRunner.class) @Config(manifest = Config.NONE) public class DaoTest {
 
   private DaoManager manager;
+  private UserDao userDao;
+
+  @Before public void init() {
+    Context c = Robolectric.getShadowApplication().getApplicationContext();
+    userDao = new UserDao();
+    manager = new DaoManager(c, "test.db", 1, userDao);
+  }
 
   @Test public void testDao() throws Exception {
-
-    Context c = Robolectric.getShadowApplication().getApplicationContext();
-
-    UserDao userDao = new UserDao();
-
-    manager = new DaoManager(c, "test.db", 1, userDao);
-
     for (int i = 0; i < 10; i++) {
       String name = "Name" + i;
       int age = i;
