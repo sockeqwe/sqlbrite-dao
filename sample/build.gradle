@@ -29,7 +29,7 @@ android {
 
 def annotatedAdapter = '1.1.0'
 def supportLib = '23.0.1'
-def mapperVersion = '0.4.0.2-SNAPSHOT'
+def mapperVersion = '0.4.0'
 
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
