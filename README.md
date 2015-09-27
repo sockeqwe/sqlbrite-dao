@@ -1,5 +1,7 @@
 # SQLBrite DAO
 
+[![Build Status](https://travis-ci.org/sockeqwe/sqlbrite-dao.svg?branch=master)](https://travis-ci.org/sockeqwe/sqlbrite-dao)
+
 This library adds an layer on top of [SQLBrite](https://github.com/square/sqlbrite) by providing basically two modules:
 
 1. ObjectMapper
