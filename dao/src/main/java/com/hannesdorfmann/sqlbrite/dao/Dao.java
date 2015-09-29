@@ -33,7 +33,7 @@ public abstract class Dao {
   /**
    * Builder pattern to build a query.
    */
-  protected class QueryBuilder {
+  public class QueryBuilder {
 
     String rawStatement;
     Iterable<String> rawStatementAffectedTables;
