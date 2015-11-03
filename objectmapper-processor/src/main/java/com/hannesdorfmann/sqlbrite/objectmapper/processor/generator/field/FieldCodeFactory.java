@@ -37,6 +37,9 @@ public class FieldCodeFactory {
       case SHORT:
         return new FieldCodeGenerator(field, "getShort");
 
+      case BOOLEAN:
+        return new BooleanFieldCodeGenerator(field);
+
       case ARRAY:
         ArrayType arrayType = (ArrayType) element.asType();
         if (arrayType.getComponentType().getKind() == TypeKind.BYTE) {

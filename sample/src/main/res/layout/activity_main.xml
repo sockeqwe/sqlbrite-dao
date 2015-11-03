@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    >
 
   <android.support.v7.widget.RecyclerView
       android:id="@+id/recyclerView"
@@ -13,9 +14,11 @@
       />
 
 
-  <LinearLayout android:layout_width="match_parent"
+  <LinearLayout
+      android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:padding="8dp">
+      android:padding="8dp"
+      >
 
     <EditText
         android:id="@+id/cid"
@@ -42,6 +45,11 @@
         android:hint="lastname"
         />
 
+    <CheckBox
+        android:id="@+id/adult"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        />
     <Button
         android:id="@+id/insert"
         android:layout_width="wrap_content"

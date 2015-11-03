@@ -39,6 +39,6 @@ public class CustomerAdapter extends SupportAnnotatedAdapter implements Customer
 
     vh.id.setText("" + c.getId());
     vh.first.setText(c.getFirstname());
-    vh.last.setText(c.getLastname());
+    vh.last.setText(c.getLastname() + " " + (c.isAdult() ? "(A)" : ""));
   }
 }

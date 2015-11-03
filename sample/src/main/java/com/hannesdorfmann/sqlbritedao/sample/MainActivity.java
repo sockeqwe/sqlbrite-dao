@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 import butterknife.Bind;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
   @Bind(R.id.cid) EditText idEdit;
   @Bind(R.id.lastname) EditText lastnameEdit;
   @Bind(R.id.firstname) EditText firstnameEdit;
+  @Bind(R.id.adult) CheckBox adultCheckBox;
 
   CustomerAdapter adapter;
 
@@ -82,8 +84,8 @@ public class MainActivity extends AppCompatActivity {
     };
 
     customerDao.insert(Integer.parseInt(idEdit.getText().toString()),
-        firstnameEdit.getText().toString(), lastnameEdit.getText().toString())
-        .subscribe(insertSubscription);
+        firstnameEdit.getText().toString(), lastnameEdit.getText().toString(),
+        adultCheckBox.isChecked()).subscribe(insertSubscription);
   }
 
   private void injectDependencies() {

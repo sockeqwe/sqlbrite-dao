@@ -7,27 +7,26 @@ import com.hannesdorfmann.sqlbritedao.sample.model.Person;
 /**
  * @author Hannes Dorfmann
  */
-@ObjectMappable
-public class Customer extends Person {
+@ObjectMappable public class Customer extends Person {
 
   public static final String TABLE_NAME = "Customer";
   public static final String COL_FIRSTNAME = "firstname";
   public static final String COL_LASTNAME = "lastname";
-
+  public static final String COL_ADULT = "adult";
 
   @Column(COL_FIRSTNAME) String firstname;
-
   @Column(COL_LASTNAME) String lastname;
+  private boolean adult;
 
   public Customer() {
   }
 
-  public Customer(long id, String firstname, String lastname) {
+  public Customer(long id, String firstname, String lastname, boolean adult) {
     this.id = id;
     this.firstname = firstname;
     this.lastname = lastname;
+    this.adult = adult;
   }
-
 
   public String getFirstname() {
     return firstname;
@@ -35,5 +34,13 @@ public class Customer extends Person {
 
   public String getLastname() {
     return lastname;
+  }
+
+  public boolean isAdult() {
+    return adult;
+  }
+
+  @Column(COL_ADULT) public void setAdult(boolean adult) {
+    this.adult = adult;
   }
 }
