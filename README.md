@@ -81,14 +81,7 @@ public final class CustomerMapper {
 }
 ```
 
-So basically it generates a `Func1` that can be applied on a SQLBrite `QueryObservable` to instantiate your data object (i.e. Customer) out of a `Cursor` (cursor gets closed internally and resources released by SQLBrite) and retrieve fetch data by calling `cursor.getString(index)` and so on.
-
-```java
-Cursor c = ... ; // Some SQL SELECT statement
-
-List<Customer> customers = CustomerMapper.list(cursor);
-```
-
+So basically it generates a `Func1` that can be applied on a SQLBrite `QueryObservable` to instantiate your data object (i.e. Customer) out of a `Cursor` (cursor gets closed internally and resources released by SQLBrite) and retrieve fetch data by calling `cursor.getString(index)` and so on. See **DAO** section below for a concrete example how to use the generated `Func1`.
 Additionally, it also generates a type safe builder for `ContentValues`.
 ```java
 ContentValues cv = CustomerMapper.contentValues()
