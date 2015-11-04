@@ -3,7 +3,9 @@ package com.hannesdorfmann.sqlbrite.objectmapper.processor;
 import com.hannesdorfmann.sqlbrite.objectmapper.annotation.Column;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -24,7 +26,7 @@ import javax.lang.model.util.Types;
 public class ObjectMappableAnnotatedClass {
 
   private TypeElement typeElement;
-  private Map<String, ColumnAnnotateable> fieldsMap = new HashMap<>();
+  private Map<String, ColumnAnnotateable> columnAnnotatedElementsMap = new HashMap<>();
 
   public ObjectMappableAnnotatedClass(TypeElement typeElement) throws ProcessingException {
     this.typeElement = typeElement;
@@ -71,70 +73,54 @@ public class ObjectMappableAnnotatedClass {
     PackageElement originPackage = elementUtils.getPackageOf(typeElement);
     PackageElement superClassPackage;
 
+    Set<VariableElement> annotatedFields = new LinkedHashSet<>();
+    Map<String, ExecutableElement> possibleSetterFields = new HashMap<>();
+
     do {
 
       // Scan fields
       for (Element e : currentClass.getEnclosedElements()) {
-
         annotation = e.getAnnotation(Column.class);
-
         if (e.getKind() == ElementKind.FIELD && annotation != null) {
+          annotatedFields.add((VariableElement) e);
+        }
+        // Check methods
+        else if (e.getKind() == ElementKind.METHOD) {
 
-          ColumnAnnotatedField field = new ColumnAnnotatedField((VariableElement) e, annotation);
+          // Save possible setters
+          ExecutableElement methodElement = (ExecutableElement) e;
+          String setterMethodName = methodElement.getSimpleName().toString();
 
-          // Check field visibility of super class field
-          if (currentClass != typeElement && !field.getField()
-              .getModifiers()
-              .contains(Modifier.PUBLIC)) {
-
-            superClassPackage = elementUtils.getPackageOf(currentClass);
-
-            if ((superClassPackage != null && originPackage == null) || (superClassPackage == null
-                && originPackage != null) || (superClassPackage != null
-                && !superClassPackage.equals(originPackage)) || (originPackage != null
-                && !originPackage.equals(superClassPackage))) {
-
-              throw new ProcessingException(e,
-                  "The field %s in class %s can not be accessed from ObjectMapper because of "
-                      + "visibility issue. Either move class %s into the same package "
-                      + "as %s or make the field %s public or create and annotate a public setter "
-                      + "method for this field with @%s instead of annotating the field itself",
-                  field.getFieldName(), field.getQualifiedSurroundingClassName(),
-                  typeElement.getQualifiedName().toString(),
-                  field.getQualifiedSurroundingClassName(), field.getFieldName(),
-                  Column.class.getSimpleName());
+          if (setterMethodName.startsWith("set")) {
+            ExecutableElement existingSetter = possibleSetterFields.get(setterMethodName);
+            if (existingSetter != null) {
+              // The new setter has better visibility, so pick that one
+              if (ModifierUtils.compareModifierVisibility(methodElement, existingSetter) == -1) {
+                possibleSetterFields.put(setterMethodName, methodElement);
+              }
+            } else {
+              possibleSetterFields.put(setterMethodName, methodElement);
             }
           }
 
-          ColumnAnnotateable existingColumnAnnotateable = fieldsMap.get(field.getColumnName());
-          if (existingColumnAnnotateable != null) {
-            throw new ProcessingException(e,
-                "The field %s in class %s is annotated with @%s with column name = \"%s\" but this column name is already used by %s in class %s",
-                field.getFieldName(), field.getQualifiedSurroundingClassName(),
-                Column.class.getSimpleName(), field.getColumnName(),
-                existingColumnAnnotateable.getElementName(),
-                existingColumnAnnotateable.getQualifiedSurroundingClassName());
+          // Is it an annotated setter?
+          if (annotation != null) {
+
+            ColumnAnnotatedMethod method = new ColumnAnnotatedMethod(methodElement, annotation);
+
+            ColumnAnnotateable existingColumnAnnotateable =
+                columnAnnotatedElementsMap.get(method.getColumnName());
+            if (existingColumnAnnotateable != null) {
+              throw new ProcessingException(methodElement,
+                  "The method %s in class %s is annotated with @%s with column name = \"%s\" but this column name is already used by %s in class %s",
+                  method.getMethodName(), method.getQualifiedSurroundingClassName(),
+                  Column.class.getSimpleName(), method.getColumnName(),
+                  existingColumnAnnotateable.getElementName(),
+                  existingColumnAnnotateable.getQualifiedSurroundingClassName());
+            }
+
+            columnAnnotatedElementsMap.put(method.getColumnName(), method);
           }
-
-          fieldsMap.put(field.getColumnName(), field);
-        }
-        // Check methods
-        else if (e.getKind() == ElementKind.METHOD && annotation != null) {
-
-          ColumnAnnotatedMethod method =
-              new ColumnAnnotatedMethod((ExecutableElement) e, annotation);
-
-          ColumnAnnotateable existingColumnAnnotateable = fieldsMap.get(method.getColumnName());
-          if (existingColumnAnnotateable != null) {
-            throw new ProcessingException(e,
-                "The method %s in class %s is annotated with @%s with column name = \"%s\" but this column name is already used by %s in class %s",
-                method.getMethodName(), method.getQualifiedSurroundingClassName(),
-                Column.class.getSimpleName(), method.getColumnName(),
-                existingColumnAnnotateable.getElementName(),
-                existingColumnAnnotateable.getQualifiedSurroundingClassName());
-          }
-
-          fieldsMap.put(method.getColumnName(), method);
         } else if (annotation != null) {
           throw new ProcessingException(e,
               "%s is of type %s and annotated with @%s, but only Fields or setter Methods can be annotated with @%s",
@@ -146,6 +132,118 @@ public class ObjectMappableAnnotatedClass {
       superClassType = currentClass.getSuperclass();
       currentClass = (TypeElement) typeUtils.asElement(superClassType);
     } while (superClassType.getKind() != TypeKind.NONE);
+
+    // Check fields
+    for (VariableElement e : annotatedFields) {
+
+      annotation = e.getAnnotation(Column.class);
+      currentClass = (TypeElement) e.getEnclosingElement();
+
+      if (e.getModifiers().contains(Modifier.PRIVATE)) {
+        // Private field: Automatically try to detect a setter
+        String fieldName = e.getSimpleName().toString();
+        String perfectSetterName;
+        if (fieldName.length() == 1) {
+          perfectSetterName = "set" + fieldName.toUpperCase();
+        } else {
+          String withoutHungarianNotation = HungarianNotation.removeNotation(fieldName);
+          perfectSetterName = "set" + Character.toUpperCase(withoutHungarianNotation.charAt(0))
+              + withoutHungarianNotation.substring(1);
+        }
+
+        ExecutableElement setterMethod = possibleSetterFields.get(perfectSetterName);
+        if (setterMethod != null && isSetterForField(setterMethod, e)) {
+          // valid setter, so use this one
+          ColumnAnnotatedMethod method = new ColumnAnnotatedMethod(setterMethod, annotation);
+          columnAnnotatedElementsMap.put(method.getColumnName(), method);
+          continue;
+        } else {
+
+          if (fieldName.startsWith("m")) {
+            // setmFoo()  if field == mFoo
+            setterMethod = possibleSetterFields.get("set" + fieldName);
+            if (setterMethod != null && isSetterForField(setterMethod, e)) {
+              // valid setter
+              ColumnAnnotatedMethod method = new ColumnAnnotatedMethod(setterMethod, annotation);
+              columnAnnotatedElementsMap.put(method.getColumnName(), method);
+              continue;
+            } else {
+              // setMFoo  if field == mFoo
+              if (fieldName.length() > 1) {
+                setterMethod = possibleSetterFields.get(
+                    "set" + Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1));
+                if (setterMethod != null && isSetterForField(setterMethod, e)) {
+                  // valid setter
+                  ColumnAnnotatedMethod method =
+                      new ColumnAnnotatedMethod(setterMethod, annotation);
+                  columnAnnotatedElementsMap.put(method.getColumnName(), method);
+                  continue;
+                }
+              }
+            }
+          }
+        }
+
+        throw new ProcessingException(e, "The field '%s' in class %s is private. "
+            + "A corresponding setter method with the name '%s(%s)' is expected but haven't been found. Please add this setter method, "
+            + "If you have another setter method named differently "
+            + "please annotate your setter method with @%s ", fieldName,
+            e.getEnclosingElement().getSimpleName().toString(), perfectSetterName,
+            e.asType().toString(), Column.class.getSimpleName());
+      } else {
+        // A simple non private field
+        ColumnAnnotatedField field = new ColumnAnnotatedField((VariableElement) e, annotation);
+
+        // Check field visibility of super class field
+        if (currentClass != typeElement && !field.getField()
+            .getModifiers()
+            .contains(Modifier.PUBLIC)) {
+
+          superClassPackage = elementUtils.getPackageOf(currentClass);
+
+          if ((superClassPackage != null && originPackage == null) || (superClassPackage == null
+              && originPackage != null) || (superClassPackage != null && !superClassPackage.equals(
+              originPackage)) || (originPackage != null && !originPackage.equals(
+              superClassPackage))) {
+
+            throw new ProcessingException(e,
+                "The field %s in class %s can not be accessed from ObjectMapper because of "
+                    + "visibility issue. Either move class %s into the same package "
+                    + "as %s or make the field %s public or create and annotate a public setter "
+                    + "method for this field with @%s instead of annotating the field itself",
+                field.getFieldName(), field.getQualifiedSurroundingClassName(),
+                typeElement.getQualifiedName().toString(), field.getQualifiedSurroundingClassName(),
+                field.getFieldName(), Column.class.getSimpleName());
+          }
+        }
+
+        ColumnAnnotateable existingColumnAnnotateable =
+            columnAnnotatedElementsMap.get(field.getColumnName());
+        if (existingColumnAnnotateable != null) {
+          throw new ProcessingException(e,
+              "The field %s in class %s is annotated with @%s with column name = \"%s\" but this column name is already used by %s in class %s",
+              field.getFieldName(), field.getQualifiedSurroundingClassName(),
+              Column.class.getSimpleName(), field.getColumnName(),
+              existingColumnAnnotateable.getElementName(),
+              existingColumnAnnotateable.getQualifiedSurroundingClassName());
+        }
+
+        columnAnnotatedElementsMap.put(field.getColumnName(), field);
+      }
+    }
+  }
+
+  /**
+   * Checks if the setter method is valid for the given field
+   *
+   * @param setter The setter method
+   * @param field The field
+   * @return true if setter works for given field, otherwise false
+   */
+  private boolean isSetterForField(ExecutableElement setter, VariableElement field) {
+    return setter.getParameters() != null && setter.getParameters().size() == 1
+        && setter.getParameters().get(0).asType().equals(field.asType());
+    // TODO inheritance? TypeUtils is applicable?
   }
 
   @Override public boolean equals(Object o) {
@@ -194,6 +292,6 @@ public class ObjectMappableAnnotatedClass {
    * @return annotated elements
    */
   public Collection<ColumnAnnotateable> getColumnAnnotatedElements() {
-    return fieldsMap.values();
+    return columnAnnotatedElementsMap.values();
   }
 }

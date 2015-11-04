@@ -15,7 +15,7 @@ import com.hannesdorfmann.sqlbritedao.sample.model.Person;
   public static final String COL_ADULT = "adult";
 
   @Column(COL_FIRSTNAME) String firstname;
-  @Column(COL_LASTNAME) String lastname;
+  @Column(COL_LASTNAME)  private String mLastname;
   private boolean adult;
 
   public Customer() {
@@ -24,7 +24,7 @@ import com.hannesdorfmann.sqlbritedao.sample.model.Person;
   public Customer(long id, String firstname, String lastname, boolean adult) {
     this.id = id;
     this.firstname = firstname;
-    this.lastname = lastname;
+    this.mLastname = lastname;
     this.adult = adult;
   }
 
@@ -33,7 +33,7 @@ import com.hannesdorfmann.sqlbritedao.sample.model.Person;
   }
 
   public String getLastname() {
-    return lastname;
+    return mLastname;
   }
 
   public boolean isAdult() {
@@ -42,5 +42,9 @@ import com.hannesdorfmann.sqlbritedao.sample.model.Person;
 
   @Column(COL_ADULT) public void setAdult(boolean adult) {
     this.adult = adult;
+  }
+
+  public void setmLastname(String mLastname) {
+    this.mLastname = mLastname;
   }
 }

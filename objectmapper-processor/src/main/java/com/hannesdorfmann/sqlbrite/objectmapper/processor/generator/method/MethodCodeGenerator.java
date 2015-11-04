@@ -1,12 +1,14 @@
 package com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.method;
 
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.ColumnAnnotatedMethod;
+import com.hannesdorfmann.sqlbrite.objectmapper.processor.HungarianNotation;
 import com.hannesdorfmann.sqlbrite.objectmapper.processor.generator.CodeGenerator;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import javax.lang.model.element.Modifier;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Generates the code to assign cursor data throught setter methods
@@ -34,9 +36,8 @@ public class MethodCodeGenerator implements CodeGenerator {
       String contentValuesVarName) {
 
     String methodName = method.getMethodName();
-    if (methodName.matches("^set[A-Z]\\w*")) {
-      methodName = methodName.substring(3).toLowerCase();
-    }
+    methodName = HungarianNotation.removeNotationFromSetterAndSetPrefix(methodName);
+    methodName = StringUtils.uncapitalize(methodName);
 
     // setter method
     builder.addMethod(MethodSpec.methodBuilder(methodName)
