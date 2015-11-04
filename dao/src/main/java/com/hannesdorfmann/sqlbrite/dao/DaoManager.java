@@ -16,8 +16,7 @@ import java.util.Set;
  * The {@link DaoManager} manages, like the name suggests, the component that
  * manages the {@link Dao}. It's responsible to call
  * {@link Dao#createTable(SQLiteDatabase)} and
- * {@link Dao#onUpgrade(SQLiteDatabase, int, int)}. It also injects the
- * {@link SQLiteOpenHelper} to the dao by calling
+ * {@link Dao#onUpgrade(SQLiteDatabase, int, int)}. It also setup the {@link BriteDatabase}.
  *
  * @author Hannes Dorfmann
  */
@@ -46,6 +45,15 @@ public class DaoManager {
     for (Dao dao : daos) {
       addDao(dao);
     }
+  }
+
+  /**
+   * Get the underlying {@link BriteDatabase} instance
+   *
+   * @return The database
+   */
+  public BriteDatabase getDatabase() {
+    return db;
   }
 
   /**
