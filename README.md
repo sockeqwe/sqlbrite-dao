@@ -19,7 +19,7 @@ To run annotation processing you have to use [apt](https://bitbucket.org/hvisser
 Please note that DAO and Object-Mapper are independent. You can choose whether you want to use both or not.
 
 
-## How to use
+# How to use
 This library adds an layer on top of [SQLBrite](https://github.com/square/sqlbrite) by providing basically two modules:
 
 1. ObjectMapper
@@ -122,7 +122,7 @@ The supported types for `@Column` are:
 
 
 ### Kotlin support
-ObjectMapper is supported by Kotlin (use kapt instead of apt for annotation processing).
+ObjectMapper is supported by Kotlin (use kapt` instead of `apt` for annotation processing):
 
 ```kotlin
  @ObjectMappable
@@ -130,7 +130,8 @@ ObjectMapper is supported by Kotlin (use kapt instead of apt for annotation proc
 
      @Column("name")
      var name: String? = null
-     @Column("age)
+
+     @Column("age")
      var age : Int = 0
  }
 ```
