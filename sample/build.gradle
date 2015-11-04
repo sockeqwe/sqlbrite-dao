@@ -37,7 +37,7 @@ kapt {
 
 def annotatedAdapter = '1.1.0'
 def supportLib = '23.0.1'
-def mapperVersion = '0.4.0.9-SNAPSHOT'
+def mapperVersion = '0.4.1'
 
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])

@@ -2,6 +2,24 @@
 
 [![Build Status](https://travis-ci.org/sockeqwe/sqlbrite-dao.svg?branch=master)](https://travis-ci.org/sockeqwe/sqlbrite-dao)
 
+
+
+## Dependencies
+Latest version: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/badge.png)](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/)
+
+```groovy
+// DAO
+compile 'com.hannesdorfmann.sqlbrite:dao:xxx'
+
+// Object Mapper
+compile 'com.hannesdorfmann.sqlbrite:annotations:xxx'
+apt 'com.hannesdorfmann.sqlbrite:object-mapper:xxx'
+```
+To run annotation processing you have to use [apt](https://bitbucket.org/hvisser/android-apt).
+Please note that DAO and Object-Mapper are independent. You can choose whether you want to use both or not.
+
+
+## How to use
 This library adds an layer on top of [SQLBrite](https://github.com/square/sqlbrite) by providing basically two modules:
 
 1. ObjectMapper
@@ -98,8 +116,26 @@ The supported types for `@Column` are:
  - short
  - float
  - double
+ - boolean
  - byte[]
  - java.util.Date (mapped to long internally, time in milli seconds)
+
+
+### Kotlin support
+ObjectMapper is supported by Kotlin (use kapt instead of apt for annotation processing).
+
+```kotlin
+ @ObjectMappable
+ class People  {
+
+     @Column("name")
+     var name: String? = null
+     @Column("age)
+     var age : Int = 0
+ }
+```
+
+Unfortunately, data classes are not supported yet.
 
 
 ## DAO
@@ -191,19 +227,6 @@ To sum up:
  - A `DaoManager` is representing the whole database file and basically is a `SQLiteOpenHelper` and manages `SqlBrite` instance for you.
  - A `Dao` is representing a table of a database. You define a public API for other software components of your App like `getCustomers()` or `addCustomer()` to query and manipulate the data of the underlying table.
 
-## Dependencies
-Latest version: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/badge.png)](https://maven-badges.herokuapp.com/maven-central/com.hannesdorfmann.sqlbrite/dao/)
-
-```groovy
-// DAO
-compile 'com.hannesdorfmann.sqlbrite:dao:xxx'
-
-// Object Mapper
-compile 'com.hannesdorfmann.sqlbrite:annotations:xxx'
-apt 'com.hannesdorfmann.sqlbrite:object-mapper:xxx'
-```
-To run annotation processing you have to use [apt](https://bitbucket.org/hvisser/android-apt).
-Please note that DAO and Object-Mapper are independent. You can choose whether you want to use both or not. 
 
 ## License
 ```
