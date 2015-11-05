@@ -10,7 +10,7 @@ android:
 #    - sys-img-armeabi-v7a-android-23
 
 jdk:
-  - oraclejdk8
+  - oraclejdk7
 
 #after_success:
 #  - .buildscript/deploy_snapshot.sh
