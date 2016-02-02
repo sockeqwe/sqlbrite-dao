@@ -225,7 +225,7 @@ public abstract class Dao {
    *
    * @param table the table name
    * @param contentValues The content values
-   * @return An observable with the row Id of the new inserted row
+   * @return An <b>deferred</b> observable with the row Id of the new inserted row
    */
   protected Observable<Long> insert(final String table, final ContentValues contentValues) {
     return Observable.defer(new Func0<Observable<Long>>() {
@@ -242,7 +242,7 @@ public abstract class Dao {
    * @param table the table name
    * @param contentValues The content values
    * @param conflictAlgorithm The conflict algorithm
-   * @return An observable with the row Id of the new inserted row
+   * @return An <b>deferred</b> observable with the row Id of the new inserted row
    */
   protected Observable<Long> insert(final String table, final ContentValues contentValues,
       final int conflictAlgorithm) {
@@ -261,7 +261,7 @@ public abstract class Dao {
    * @param values The values to update
    * @param whereClause The where clause
    * @param whereArgs The where clause arguments
-   * @return An observable containing the number of rows that have been changed by this update
+   * @return An <b>deferred</b> observable containing the number of rows that have been changed by this update
    */
   protected Observable<Integer> update(@NonNull final String table,
       @NonNull final ContentValues values, @Nullable final String whereClause,
@@ -282,7 +282,7 @@ public abstract class Dao {
    * @param conflictAlgorithm The conflict algorithm
    * @param whereClause The where clause
    * @param whereArgs The where clause arguments
-   * @return An observable containing the number of rows that have been changed by this update
+   * @return An <b>deferred</b> observable containing the number of rows that have been changed by this update
    */
   protected Observable<Integer> update(@NonNull final String table,
       @NonNull final ContentValues values, final int conflictAlgorithm,
@@ -299,7 +299,7 @@ public abstract class Dao {
    * Deletes all rows from a table
    *
    * @param table The table to delete
-   * @return Observable with the number of deleted rows
+   * @return <b>deferred</b> Observable with the number of deleted rows
    */
   protected Observable<Integer> delete(@NonNull final String table) {
     return delete(table, null);
@@ -311,7 +311,7 @@ public abstract class Dao {
    * @param table The table name
    * @param whereClause the where clause
    * @param whereArgs the where clause arguments
-   * @return Observable with the number of deleted rows
+   * @return <b>deferred</b> Observable with the number of deleted rows
    */
   protected Observable<Integer> delete(@NonNull final String table,
       @Nullable final String whereClause, @Nullable final String... whereArgs) {
