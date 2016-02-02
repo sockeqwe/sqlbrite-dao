@@ -2,6 +2,7 @@ package com.hannesdorfmann.sqlbrite.dao;
 
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
+import android.database.DefaultDatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -31,8 +32,16 @@ public class DaoManager {
   private final int version;
   private BriteDatabase db;
 
+  /**
+   * Creates a new DaoManager with a new {@link DefaultDatabaseErrorHandler}
+   *
+   * @param c The context
+   * @param databaseName the database
+   * @param version the version
+   * @param daos the daos
+   */
   public DaoManager(Context c, String databaseName, int version, Dao... daos) {
-    this(c, databaseName, version, null, null, daos);
+    this(c, databaseName, version, null, new DefaultDatabaseErrorHandler(), daos);
   }
 
   public DaoManager(Context c, String databaseName, int version,
