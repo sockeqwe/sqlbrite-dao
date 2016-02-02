@@ -49,6 +49,7 @@ dependencies {
   compile 'com.android.support:cardview-v7:' + supportLib
 
   compile 'com.jakewharton:butterknife:7.0.1'
+  kapt 'com.jakewharton:butterknife:7.0.1'
 
   kapt 'com.hannesdorfmann.sqlbrite:object-mapper:' + mapperVersion
   compile 'com.hannesdorfmann.sqlbrite:annotations:' + mapperVersion
@@ -61,7 +62,7 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 buildscript {
-  ext.kotlin_version = '1.0.0-beta-1103'
+  ext.kotlin_version = '1.0.0-beta-4589'
   repositories {
     mavenCentral()
   }
