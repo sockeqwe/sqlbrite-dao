@@ -5,10 +5,8 @@ import android.database.DatabaseErrorHandler;
 import android.database.DefaultDatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,36 +21,44 @@ import java.util.Set;
  */
 public class DaoManager {
 
-  /**
-   * A simple map to hold the references to a concrete {@link Dao}.
-   */
-  private Set<Dao> daos = new HashSet<>();
-
+  private Set<Dao> daos;
   private final String name;
   private final int version;
   private BriteDatabase db;
+  private TablesCreatedListener createdListener;
+  private TablesUpgradedListener upgradedListener;
 
-  /**
-   * Creates a new DaoManager with a new {@link DefaultDatabaseErrorHandler}
-   *
-   * @param c The context
-   * @param databaseName the database
-   * @param version the version
-   * @param daos the daos
-   */
-  public DaoManager(Context c, String databaseName, int version, Dao... daos) {
-    this(c, databaseName, version, null, new DefaultDatabaseErrorHandler(), daos);
-  }
+  private DaoManager(Builder builder) {
 
-  public DaoManager(Context c, String databaseName, int version,
-      SQLiteDatabase.CursorFactory factory, DatabaseErrorHandler errorHandler, Dao... daos) {
+    if (builder.name == null) {
+      throw new IllegalArgumentException(
+          "Database name not set. Use Builder.databaseName() to specify a database name");
+    }
 
-    OpenHelper openHelper = new OpenHelper(c, databaseName, factory, version, errorHandler);
+    if (builder.version == -1) {
+      throw new IllegalArgumentException(
+          "Database version not set. Use Builder.version() to specify the database version");
+    }
+
+    if (builder.daos.isEmpty()) {
+      throw new IllegalArgumentException(
+          "No DAO added. Use Builder.add() to register at least one DAO");
+    }
+
+    this.name = builder.name;
+    this.version = builder.version;
+    this.createdListener = builder.createdListener;
+    this.upgradedListener = builder.upgradedListener;
+    this.daos = builder.daos;
+
+    OpenHelper openHelper =
+        new OpenHelper(builder.context, name, builder.cursorFactory, version, builder.errorHandler);
+
     db = SqlBrite.create().wrapDatabaseHelper(openHelper);
-    this.name = databaseName;
-    this.version = version;
-    for (Dao dao : daos) {
-      addDao(dao);
+    db.setLoggingEnabled(builder.logging);
+
+    for (Dao dao : builder.daos) {
+      dao.setSqlBriteDb(db);
     }
   }
 
@@ -96,20 +102,13 @@ public class DaoManager {
   }
 
   /**
-   * Activate or deactivate logging
+   * Use this to instantiate a builder
    *
-   * @param enabled true if logging enabled, false if not.
+   * @param context The context
+   * @return A {@link Builder}
    */
-  public void setLogging(boolean enabled) {
-    db.setLoggingEnabled(enabled);
-  }
-
-  /**
-   * Adds an dao
-   */
-  private void addDao(Dao dao) {
-    dao.setSqlBriteDb(db);
-    daos.add(dao);
+  public static Builder with(Context context) {
+    return new Builder(context);
   }
 
   /**
@@ -125,12 +124,114 @@ public class DaoManager {
       for (Dao d : daos) {
         d.createTable(db);
       }
+
+      if (createdListener != null) {
+        createdListener.onTablesCreated(db);
+      }
     }
 
     @Override public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
       for (Dao d : daos) {
         d.onUpgrade(db, oldVersion, newVersion);
       }
+
+      if (upgradedListener != null) {
+        upgradedListener.onTablesUpgraded(db, oldVersion, newVersion);
+      }
     }
+  }
+
+  public static class Builder {
+    private Set<Dao> daos = new HashSet<>();
+    private String name;
+    private int version = -1;
+    private final Context context;
+    private SQLiteDatabase.CursorFactory cursorFactory = null;
+    private DatabaseErrorHandler errorHandler = new DefaultDatabaseErrorHandler();
+    private TablesCreatedListener createdListener = null;
+    private TablesUpgradedListener upgradedListener = null;
+    private boolean logging = false;
+
+    private Builder(Context context) {
+      this.context = context.getApplicationContext();
+    }
+
+    public Builder databaseName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder version(int version) {
+      this.version = version;
+      return this;
+    }
+
+    public Builder cursorFactory(SQLiteDatabase.CursorFactory factory) {
+      this.cursorFactory = cursorFactory;
+      return this;
+    }
+
+    public Builder errorHandler(DatabaseErrorHandler errorHandler) {
+      this.errorHandler = errorHandler;
+      return this;
+    }
+
+    public Builder onTablesCreated(TablesCreatedListener createdListener) {
+      this.createdListener = createdListener;
+      return this;
+    }
+
+    public Builder onTablesUpgraded(TablesUpgradedListener tablesUpgradedListener) {
+      this.upgradedListener = tablesUpgradedListener;
+      return this;
+    }
+
+    public Builder add(Dao dao) {
+      this.daos.add(dao);
+      return this;
+    }
+
+    public Builder logging(boolean logging) {
+      this.logging = logging;
+      return this;
+    }
+
+    public DaoManager build() {
+      return new DaoManager(this);
+    }
+  }
+
+  /**
+   * Listener that gets notified after all registered DAOs have created their SQL Table.
+   * In other words after {@link Dao#createTable(SQLiteDatabase)} has been invoked for each DAO.
+   */
+  public interface TablesCreatedListener {
+
+    /**
+     * Callback that gets invoked after all registered DAOs have created their SQL Table.
+     * In other words after {@link Dao#createTable(SQLiteDatabase)} has been invoked for each DAO.
+     *
+     * @param db the database
+     */
+    void onTablesCreated(SQLiteDatabase db);
+  }
+
+  /**
+   * Listener that gets notified after all registered DAOs have upgraded their SQL Table Schema.
+   * In other words after {@link Dao#onUpgrade(SQLiteDatabase, int, int)} has been invoked for each
+   * DAO.
+   */
+  public interface TablesUpgradedListener {
+
+    /**
+     * Callback that gets invoked after all registered DAOs have upgraded their SQL Table Schema.
+     * In other words after {@link Dao#onUpgrade(SQLiteDatabase, int, int)} has been invoked for
+     * each DAO.
+     *
+     * @param db the database
+     * @param oldVersion The old version of the database
+     * @param newVersion The new version we have upgraded to
+     */
+    void onTablesUpgraded(SQLiteDatabase db, int oldVersion, int newVersion);
   }
 }

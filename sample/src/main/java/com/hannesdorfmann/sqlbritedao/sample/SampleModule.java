@@ -15,9 +15,7 @@ import javax.inject.Singleton;
     complete = false,
     injects = {
         MainActivity.class
-    }
-)
-public class SampleModule {
+    }) public class SampleModule {
 
   Context context;
   CustomerDao customerDao;
@@ -26,11 +24,15 @@ public class SampleModule {
   public SampleModule(Context context) {
     this.context = context;
     customerDao = new CustomerDao();
-    daoManager = new DaoManager(context, "Customers.db", 1, customerDao);
-    daoManager.setLogging(true);
+    daoManager = DaoManager.with(context)
+        .databaseName("Customers.db")
+        .version(1)
+        .add(customerDao)
+        .logging(true)
+        .build();
   }
 
-  @Singleton @Provides public CustomerDao providesCustomerDao(){
+  @Singleton @Provides public CustomerDao providesCustomerDao() {
     return customerDao;
   }
 }

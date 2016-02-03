@@ -217,9 +217,15 @@ To register your DAO classes to `SQLBrite` you have to create a `DaoManager`. Wh
 CustomerDao customerDao = new CustomerDao();
 AddressDao addressDao = new AddressDao();
 
-int dbVersion = 1;
-DaoManager daoManager = new DaoManager(context, "Customers.db", dbVersion, customerDao, addressDao);
-daoManager.setLogging(true);
+DaoManager daoManager = DaoManager.with(context)
+                                .databaseName("Customers.db")
+                                .version(1)
+                                .add(customerDao)
+                                .add(addressDao)
+                                .logging(true)
+                                .onTablesCreated(createdListener) // optional callback
+                                .onTablesUpgraded(upgradedListner) // optional callback
+                                .build();
 ```
 
 Please note that adding DAO's dynamically (later) is not possible. You have to instantiate a `DaoManager` and pass all your DAO's in the constructor as seen above.

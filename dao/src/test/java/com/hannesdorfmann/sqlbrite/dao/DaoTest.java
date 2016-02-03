@@ -19,7 +19,7 @@ import static org.junit.Assert.assertEquals;
   @Before public void init() {
     Context c = Robolectric.getShadowApplication().getApplicationContext();
     userDao = new UserDao();
-    manager = new DaoManager(c, "test.db", 1, userDao);
+    manager = DaoManager.with(c).databaseName("test.db").version(1).add(userDao).build();
   }
 
   @Test public void testDao() throws Exception {
