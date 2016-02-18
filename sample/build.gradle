@@ -56,6 +56,8 @@ dependencies {
   compile project(':objectmapper-annotation')
   kapt project(":objectmapper-processor")
 
+  compile 'io.reactivex:rxandroid:1.1.0'
+
   compile 'com.squareup.dagger:dagger:1.2.2'
   kapt 'com.squareup.dagger:dagger-compiler:1.2.2'
   kapt 'com.hannesdorfmann.annotatedadapter:processor:' + annotatedAdapter

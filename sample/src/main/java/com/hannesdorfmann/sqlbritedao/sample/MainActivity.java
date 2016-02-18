@@ -16,6 +16,7 @@ import java.util.List;
 import javax.inject.Inject;
 import rx.Subscriber;
 import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     recyclerView.setAdapter(adapter);
 
-    customersSubscription = customerDao.getCustomers().subscribe(new Action1<List<Customer>>() {
+    customersSubscription = customerDao.getCustomers().observeOn(AndroidSchedulers.mainThread()).subscribe(new Action1<List<Customer>>() {
       @Override public void call(List<Customer> customers) {
         adapter.setCustomers(customers);
         adapter.notifyDataSetChanged();

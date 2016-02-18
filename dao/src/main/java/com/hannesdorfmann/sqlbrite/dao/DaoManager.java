@@ -5,17 +5,24 @@ import android.database.DatabaseErrorHandler;
 import android.database.DefaultDatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import rx.Scheduler;
+import rx.schedulers.Schedulers;
 
 /**
  * The {@link DaoManager} manages, like the name suggests, the component that
  * manages the {@link Dao}. It's responsible to call
  * {@link Dao#createTable(SQLiteDatabase)} and
  * {@link Dao#onUpgrade(SQLiteDatabase, int, int)}. It also setup the {@link BriteDatabase}.
+ *
+ * <p>
+ * To create a new instance use {@link Builder}
+ * </p>
  *
  * @author Hannes Dorfmann
  */
@@ -54,7 +61,15 @@ public class DaoManager {
     OpenHelper openHelper =
         new OpenHelper(builder.context, name, builder.cursorFactory, version, builder.errorHandler);
 
-    db = SqlBrite.create().wrapDatabaseHelper(openHelper);
+    SqlBrite brite;
+    if (builder.logger != null) {
+      brite = SqlBrite.create(builder.logger);
+    } else {
+      brite = SqlBrite.create();
+    }
+
+    db = brite.wrapDatabaseHelper(openHelper,
+        builder.scheduler == null ? Schedulers.io() : builder.scheduler);
     db.setLoggingEnabled(builder.logging);
 
     for (Dao dao : builder.daos) {
@@ -141,6 +156,9 @@ public class DaoManager {
     }
   }
 
+  /**
+   * The Builder to configure and instantiate a {@link DaoManager}.
+   */
   public static class Builder {
     private Set<Dao> daos = new HashSet<>();
     private String name;
@@ -151,51 +169,147 @@ public class DaoManager {
     private TablesCreatedListener createdListener = null;
     private TablesUpgradedListener upgradedListener = null;
     private boolean logging = false;
+    private SqlBrite.Logger logger = null;
+    private Scheduler scheduler = null;
 
     private Builder(Context context) {
       this.context = context.getApplicationContext();
     }
 
-    public Builder databaseName(String name) {
+    public Builder databaseName(@NonNull String name) {
+      if (name == null || name.length() == 0) {
+        throw new NullPointerException("name == null");
+      }
       this.name = name;
       return this;
     }
 
+    /**
+     * Specify the database version
+     */
     public Builder version(int version) {
       this.version = version;
       return this;
     }
 
+    /**
+     * Specify the {@link SQLiteDatabase.CursorFactory}
+     *
+     * @param factory the factory
+     * @return the builder
+     */
     public Builder cursorFactory(SQLiteDatabase.CursorFactory factory) {
       this.cursorFactory = cursorFactory;
       return this;
     }
 
+    /**
+     * set the {@link DatabaseErrorHandler}
+     *
+     * @param errorHandler the errorhandler
+     * @return the builder itself
+     */
     public Builder errorHandler(DatabaseErrorHandler errorHandler) {
       this.errorHandler = errorHandler;
       return this;
     }
 
-    public Builder onTablesCreated(TablesCreatedListener createdListener) {
+    /**
+     * Registers a {@link TablesCreatedListener}
+     *
+     * @return the builder itseld
+     */
+    public Builder onTablesCreated(@NonNull TablesCreatedListener createdListener) {
+      if (createdListener == null) {
+        throw new NullPointerException("tablesCreatedListener == null");
+      }
+
       this.createdListener = createdListener;
       return this;
     }
 
-    public Builder onTablesUpgraded(TablesUpgradedListener tablesUpgradedListener) {
+    /**
+     * Registers a {@link TablesUpgradedListener}
+     *
+     * @param tablesUpgradedListener the listener
+     * @return the builder itself
+     */
+    public Builder onTablesUpgraded(@NonNull TablesUpgradedListener tablesUpgradedListener) {
+      if (tablesUpgradedListener == null) {
+        throw new NullPointerException("tablesUpgradedListener == null");
+      }
       this.upgradedListener = tablesUpgradedListener;
       return this;
     }
 
-    public Builder add(Dao dao) {
+    /**
+     * Add a Dao
+     *
+     * @param dao The dao to be added to this DaoManager
+     * @return the builder itseld
+     */
+    public Builder add(@NonNull Dao dao) {
+      if (dao == null) {
+        throw new NullPointerException("dao == null");
+      }
       this.daos.add(dao);
       return this;
     }
 
+    /**
+     * Enables or disables logging
+     *
+     * @param logging true for enabled, otherwise false
+     * @return the builder itself
+     */
     public Builder logging(boolean logging) {
       this.logging = logging;
       return this;
     }
 
+    /**
+     * Specify the logger that should be used internally by SqlBrite. This will automatically
+     * enable
+     * logging {@link Builder#logging(boolean)}
+     *
+     * @param logger The logger instance
+     * @return the builder itself
+     */
+    public Builder logger(@NonNull SqlBrite.Logger logger) {
+      if (logger == null) {
+        throw new NullPointerException("Logger == null");
+      }
+      this.logger = logger;
+      logging(true);
+      return this;
+    }
+
+    /**
+     * Set the scheduler that should be used by SqlBrite to emit items.
+     * A Scheduler is required for a few reasons, but the most important is that query
+     * notifications
+     * can trigger on the thread of your choice. The query can then be run without blocking the
+     * main
+     * thread or the thread which caused the trigger.
+     *
+     * <p>
+     * Per default {@link Schedulers#io()} is used.
+     * </p>
+     *
+     * @param scheduler The {@link Scheduler} on which items from {@link BriteDatabase#createQuery}
+     * will be emitted.
+     * @return the builder itself
+     */
+    public Builder scheduler(Scheduler scheduler) {
+      this.scheduler = scheduler;
+      return this;
+    }
+
+    /**
+     * Builds a DaoManager with the specified config (via this builder)
+     *
+     * @return DaoManager instance
+     */
     public DaoManager build() {
       return new DaoManager(this);
     }

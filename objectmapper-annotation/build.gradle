@@ -1,6 +1,16 @@
 apply plugin: 'java'
 apply from: '../maven-push-java-lib.gradle'
 
+sourceCompatibility = rootProject.ext.javaSourceCompatibility
+targetCompatibility = rootProject.ext.javaTargetCompatibility
+
+/*
+compileOptions.with {
+  sourceCompatibility = rootProject.ext.javaSourceCompatibility
+  targetCompatibility = rootProject.ext.javaTargetCompatibility
+}
+*/
+
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
 }
