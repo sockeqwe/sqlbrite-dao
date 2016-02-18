@@ -21,7 +21,7 @@ import rx.schedulers.Schedulers;
  * {@link Dao#onUpgrade(SQLiteDatabase, int, int)}. It also setup the {@link BriteDatabase}.
  *
  * <p>
- * To create a new instance use {@link Builder}
+ * To create a new instance use {@link #with(Context)} which returns a {@link Builder}
  * </p>
  *
  * @author Hannes Dorfmann
