@@ -122,7 +122,7 @@ The supported types for `@Column` are:
 
 
 ### Kotlin support
-ObjectMapper is supported by Kotlin (use kapt` instead of `apt` for annotation processing):
+ObjectMapper is supported by Kotlin (use `kapt` instead of `apt` for annotation processing):
 
 ```kotlin
  @ObjectMappable
