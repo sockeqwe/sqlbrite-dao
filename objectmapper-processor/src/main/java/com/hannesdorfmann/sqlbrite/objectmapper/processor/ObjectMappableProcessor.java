@@ -113,7 +113,7 @@ import rx.functions.Func1;
 
         // Check if class is already added to the annotated classes
         ObjectMappableAnnotatedClass annotatedClass =
-            new ObjectMappableAnnotatedClass(classElement);
+            new ObjectMappableAnnotatedClass(messager, classElement);
         if (annotatedClasses.contains(annotatedClass)) {
           continue;
         }

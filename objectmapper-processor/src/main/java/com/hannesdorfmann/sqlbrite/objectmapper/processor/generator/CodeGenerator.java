@@ -20,9 +20,9 @@ public interface CodeGenerator {
    * @param cursorVarName The variable name of the cursor from which you should read
    * @param indexVarName The variable name of the index of the column
    */
-  public void generateAssignStatement(CodeBlock.Builder builder, String objectVarName,
+  void generateAssignStatement(CodeBlock.Builder builder, String objectVarName,
       String cursorVarName, String indexVarName);
 
-  public void generateContentValuesBuilderMethod(TypeSpec.Builder builder, TypeName type,
+  void generateContentValuesBuilderMethod(TypeSpec.Builder builder, TypeName type,
       String contentValuesVarName);
 }

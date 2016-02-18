@@ -18,5 +18,5 @@ public interface SqlExecuteCompileable extends SqlCompileable {
    *
    * @throws SQLException
    */
-  public void execute(SQLiteDatabase database) throws SQLException;
+  void execute(SQLiteDatabase database) throws SQLException;
 }

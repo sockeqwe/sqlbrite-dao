@@ -18,7 +18,7 @@ public interface ColumnAnnotateable {
    * @param cursorVarName The variable name of the cursor from which you should read
    * @param indexVarName The variable name of the index of the column
    */
-  public void generateAssignStatement(CodeBlock.Builder builder, String objectVarName,
+  void generateAssignStatement(CodeBlock.Builder builder, String objectVarName,
       String cursorVarName, String indexVarName);
 
   /**
@@ -28,7 +28,7 @@ public interface ColumnAnnotateable {
    * @param type TypeName of the builder
    * @param contentValuesVarName The variable name of the ContentValues
    */
-  public void generateContentValuesBuilderMethod(TypeSpec.Builder builder, TypeName type,
+  void generateContentValuesBuilderMethod(TypeSpec.Builder builder, TypeName type,
       String contentValuesVarName);
 
   /**
@@ -36,7 +36,7 @@ public interface ColumnAnnotateable {
    *
    * @return the name of the column this element is mappable for
    */
-  public String getColumnName();
+  String getColumnName();
 
   /**
    * Get the name of the Element like the field name or the method name. This method is maily used
@@ -44,14 +44,14 @@ public interface ColumnAnnotateable {
    *
    * @return elements name.
    */
-  public String getElementName();
+  String getElementName();
 
   /**
    * Get the full qualified class name of the surrounding class
    *
    * @return full qualified class name
    */
-  public String getQualifiedSurroundingClassName();
+  String getQualifiedSurroundingClassName();
 
   /**
    * Should an exception be thrown if the column index is not found for a Cursor as result of a sql
@@ -59,5 +59,5 @@ public interface ColumnAnnotateable {
    *
    * @return true if exception should be thrown, otherwise false
    */
-  public boolean isThrowOnColumnIndexNotFound();
+  boolean isThrowOnColumnIndexNotFound();
 }

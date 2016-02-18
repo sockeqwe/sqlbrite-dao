@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -27,10 +28,12 @@ public class ObjectMappableAnnotatedClass {
 
   private TypeElement typeElement;
   private Map<String, ColumnAnnotateable> columnAnnotatedElementsMap = new HashMap<>();
+  private Messager messager;
 
-  public ObjectMappableAnnotatedClass(TypeElement typeElement) throws ProcessingException {
+  public ObjectMappableAnnotatedClass(Messager messager, TypeElement typeElement)
+      throws ProcessingException {
     this.typeElement = typeElement;
-
+    this.messager = messager;
     // Visibility
     if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
       throw new ProcessingException(typeElement,
@@ -75,6 +78,7 @@ public class ObjectMappableAnnotatedClass {
 
     Set<VariableElement> annotatedFields = new LinkedHashSet<>();
     Map<String, ExecutableElement> possibleSetterFields = new HashMap<>();
+
 
     do {
 
@@ -142,12 +146,14 @@ public class ObjectMappableAnnotatedClass {
       if (e.getModifiers().contains(Modifier.PRIVATE)) {
         // Private field: Automatically try to detect a setter
         String fieldName = e.getSimpleName().toString();
+
         String perfectSetterName;
         if (fieldName.length() == 1) {
           perfectSetterName = "set" + fieldName.toUpperCase();
         } else {
           String withoutHungarianNotation = HungarianNotation.removeNotation(fieldName);
-          perfectSetterName = "set" + Character.toUpperCase(withoutHungarianNotation.charAt(0))
+          perfectSetterName = "set"
+              + Character.toUpperCase(withoutHungarianNotation.charAt(0))
               + withoutHungarianNotation.substring(1);
         }
 
@@ -184,6 +190,19 @@ public class ObjectMappableAnnotatedClass {
           }
         }
 
+         // Kotlin special boolean character treatment
+        if (fieldName.matches("is[A-Z].*")) {
+          String setterName = "set" + fieldName.substring(2);
+          setterMethod = possibleSetterFields.get(setterName);
+          if (setterMethod != null && isSetterForField(setterMethod, e)) {
+            // valid setter
+            ColumnAnnotatedMethod method =
+                new ColumnAnnotatedMethod(setterMethod, annotation);
+            columnAnnotatedElementsMap.put(method.getColumnName(), method);
+            continue;
+          }
+        }
+
         throw new ProcessingException(e, "The field '%s' in class %s is private. "
             + "A corresponding setter method with the name '%s(%s)' is expected but haven't been found. Please add this setter method, "
             + "If you have another setter method named differently "
@@ -192,7 +211,7 @@ public class ObjectMappableAnnotatedClass {
             e.asType().toString(), Column.class.getSimpleName());
       } else {
         // A simple non private field
-        ColumnAnnotatedField field = new ColumnAnnotatedField((VariableElement) e, annotation);
+        ColumnAnnotatedField field = new ColumnAnnotatedField(e, annotation);
 
         // Check field visibility of super class field
         if (currentClass != typeElement && !field.getField()
@@ -241,7 +260,8 @@ public class ObjectMappableAnnotatedClass {
    * @return true if setter works for given field, otherwise false
    */
   private boolean isSetterForField(ExecutableElement setter, VariableElement field) {
-    return setter.getParameters() != null && setter.getParameters().size() == 1
+    return setter.getParameters() != null
+        && setter.getParameters().size() == 1
         && setter.getParameters().get(0).asType().equals(field.asType());
     // TODO inheritance? TypeUtils is applicable?
   }

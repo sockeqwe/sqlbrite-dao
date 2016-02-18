@@ -10,7 +10,7 @@ import java.util.Set;
  */
 public interface SqlCompileable {
 
-  public class CompileableStatement {
+  class CompileableStatement {
     public String sql;
     public Set<String> tables;
 
@@ -20,5 +20,5 @@ public interface SqlCompileable {
     }
   }
 
-  public CompileableStatement asCompileableStatement();
+  CompileableStatement asCompileableStatement();
 }

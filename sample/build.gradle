@@ -34,10 +34,9 @@ kapt {
   generateStubs = true
 }
 
-
 def annotatedAdapter = '1.1.0'
 def supportLib = '23.0.1'
-def mapperVersion = '0.4.1'
+def mapperVersion = '0.5.2-SNAPSHOT'
 
 dependencies {
   compile fileTree(dir: 'libs', include: ['*.jar'])
@@ -51,8 +50,11 @@ dependencies {
   compile 'com.jakewharton:butterknife:7.0.1'
   kapt 'com.jakewharton:butterknife:7.0.1'
 
-  kapt 'com.hannesdorfmann.sqlbrite:object-mapper:' + mapperVersion
-  compile 'com.hannesdorfmann.sqlbrite:annotations:' + mapperVersion
+  //kapt 'com.hannesdorfmann.sqlbrite:object-mapper:' + mapperVersion
+ //compile 'com.hannesdorfmann.sqlbrite:annotations:' + mapperVersion
+
+  compile project(':objectmapper-annotation')
+  kapt project(":objectmapper-processor")
 
   compile 'com.squareup.dagger:dagger:1.2.2'
   kapt 'com.squareup.dagger:dagger-compiler:1.2.2'
@@ -62,7 +64,7 @@ dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
 buildscript {
-  ext.kotlin_version = '1.0.0-beta-4589'
+  ext.kotlin_version = '1.0.0'
   repositories {
     mavenCentral()
   }
