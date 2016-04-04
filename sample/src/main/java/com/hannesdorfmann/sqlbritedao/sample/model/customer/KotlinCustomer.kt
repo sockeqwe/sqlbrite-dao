@@ -9,7 +9,7 @@ import com.hannesdorfmann.sqlbrite.objectmapper.annotation.ObjectMappable
  * @author Hannes Dorfmann
  */
 @ObjectMappable
-class KotlinCustomer : Customer() {
+class KotlinCustomer() {
 
     @Column("street")
     var street: String? = null

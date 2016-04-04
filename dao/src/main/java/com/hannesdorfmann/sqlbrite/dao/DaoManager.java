@@ -1,10 +1,12 @@
 package com.hannesdorfmann.sqlbrite.dao;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.DatabaseErrorHandler;
 import android.database.DefaultDatabaseErrorHandler;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import com.squareup.sqlbrite.BriteDatabase;
 import com.squareup.sqlbrite.SqlBrite;
@@ -58,8 +60,14 @@ public class DaoManager {
     this.upgradedListener = builder.upgradedListener;
     this.daos = builder.daos;
 
-    OpenHelper openHelper =
-        new OpenHelper(builder.context, name, builder.cursorFactory, version, builder.errorHandler);
+    OpenHelper openHelper;
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+      openHelper = new OpenHelper(builder.context, name, builder.cursorFactory, version,
+          builder.errorHandler, builder.foreignKeyConstraints);
+    } else {
+      openHelper = new OpenHelperApi16(builder.context, name, builder.cursorFactory, version,
+          builder.errorHandler, builder.foreignKeyConstraints);
+    }
 
     SqlBrite brite;
     if (builder.logger != null) {
@@ -130,9 +138,26 @@ public class DaoManager {
    * Internally used SqlOpenHelper
    */
   private class OpenHelper extends SQLiteOpenHelper {
+
+    protected boolean foreignKeyConstraints;
+
     public OpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
-        int version, DatabaseErrorHandler errorHandler) {
+        int version, DatabaseErrorHandler errorHandler, boolean foreignKeyConstraints) {
       super(context, name, factory, version, errorHandler);
+      this.foreignKeyConstraints = foreignKeyConstraints;
+    }
+
+    @Override public void onOpen(SQLiteDatabase db) {
+      super.onOpen(db);
+      if (Build.VERSION.SDK_INT < 16) {
+        if (foreignKeyConstraints) {
+          db.execSQL("PRAGMA foreign_keys=ON;");
+        }
+      }
+    }
+
+    @Override public void onConfigure(SQLiteDatabase db) {
+      super.onConfigure(db);
     }
 
     @Override public void onCreate(SQLiteDatabase db) {
@@ -156,6 +181,20 @@ public class DaoManager {
     }
   }
 
+  @TargetApi(Build.VERSION_CODES.JELLY_BEAN) private class OpenHelperApi16 extends OpenHelper {
+    public OpenHelperApi16(Context context, String name, SQLiteDatabase.CursorFactory factory,
+        int version, DatabaseErrorHandler errorHandler, boolean foreignKeyConstraints) {
+      super(context, name, factory, version, errorHandler, foreignKeyConstraints);
+    }
+
+    @Override public void onConfigure(SQLiteDatabase db) {
+      super.onConfigure(db);
+      if (foreignKeyConstraints) {
+        db.setForeignKeyConstraintsEnabled(true);
+      }
+    }
+  }
+
   /**
    * The Builder to configure and instantiate a {@link DaoManager}.
    */
@@ -171,6 +210,7 @@ public class DaoManager {
     private boolean logging = false;
     private SqlBrite.Logger logger = null;
     private Scheduler scheduler = null;
+    private boolean foreignKeyConstraints = false;
 
     private Builder(Context context) {
       this.context = context.getApplicationContext();
@@ -302,6 +342,17 @@ public class DaoManager {
      */
     public Builder scheduler(Scheduler scheduler) {
       this.scheduler = scheduler;
+      return this;
+    }
+
+    /**
+     * Enable foreign key on the underlying database. Per default foreign key support is disabled.
+     *
+     * @param enabled true to enable, false to disable
+     * @return the builder itself
+     */
+    public Builder foreignKeyConstraints(boolean enabled) {
+      this.foreignKeyConstraints = enabled;
       return this;
     }
 
