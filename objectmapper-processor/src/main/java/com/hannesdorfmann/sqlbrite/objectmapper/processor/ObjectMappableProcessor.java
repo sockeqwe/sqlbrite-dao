@@ -180,10 +180,9 @@ import rx.functions.Func1;
 
     CodeBlock.Builder initBlockBuilder = CodeBlock.builder()
         .add("new $L<$L, $L>() {\n", Func1.class.getSimpleName(), Cursor.class.getSimpleName(),
-            clazz.getSimpleClassName())
+            elementType)
         .indent()
-        .add("@Override public $L call($L cursor) {\n", clazz.getSimpleClassName(),
-            Cursor.class.getSimpleName())
+        .add("@Override public $L call($L cursor) {\n", elementType, Cursor.class.getSimpleName())
         .indent();
 
     // assign the columns indexes
