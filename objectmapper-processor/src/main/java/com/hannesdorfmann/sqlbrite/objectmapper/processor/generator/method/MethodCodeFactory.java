@@ -61,8 +61,8 @@ public class MethodCodeFactory {
     }
 
     throw new ProcessingException(element,
-        "Unsupported type %s as parameter in method %s() in class %s annotated with @%s. Don't know how to read the parameter type",
-        parameter.toString(), method,
+        "Unsupported type %s as parameter in method %s() in class %s annotated with @%s.",
+        parameter, method.getMethod(),
         method.getQualifiedSurroundingClassName(), Column.class.getSimpleName());
   }
 }

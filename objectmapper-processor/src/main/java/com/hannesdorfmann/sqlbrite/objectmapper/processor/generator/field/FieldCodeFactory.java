@@ -60,8 +60,8 @@ public class FieldCodeFactory {
     }
 
     throw new ProcessingException(element,
-        "Unsupported type for field %s in class %S annotated with @%s. Don't know how to read the type %s",
-        field, field.getQualifiedSurroundingClassName(), Column.class.getSimpleName(),
+        "Unsupported type for field %s in class %s annotated with @%s. Don't know how to read the type %s",
+        field.getElementName(), field.getQualifiedSurroundingClassName(), Column.class.getSimpleName(),
         element.asType().toString());
   }
 }

@@ -122,4 +122,5 @@ public class ColumnAnnotatedField implements ColumnAnnotateable {
   @Override public boolean isThrowOnColumnIndexNotFound() {
     return throwOnColumnIndexNotFound;
   }
+
 }

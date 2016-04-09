@@ -99,4 +99,83 @@ public class ObjectMappableProcessorNotValidAnnotatedClassTest {
         .failsToCompile()
         .withErrorContaining("Setter method setFoo in test.PrivateFieldClass annotated with @Column is not public. Only PUBLIC setter methods are supported");
   }
+
+  @Test public void privateSetter2() {
+    JavaFileObject file =
+        JavaFileObjects.forSourceLines("test.PrivateFieldClass",
+            "package test;",
+            "",
+            "@"+ ObjectMappable.class.getCanonicalName(),
+            "public class PrivateFieldClass {",
+            "   private String foo;",
+            "   @"+ Column.class.getCanonicalName()+"(\"foo\")",
+            "   private void setFoo(String foo){ this.foo = foo; }",
+            "}"
+        );
+
+    Truth.assertAbout(JavaSourceSubjectFactory.javaSource())
+        .that(file)
+        .processedWith(new ObjectMappableProcessor())
+        .failsToCompile()
+        .withErrorContaining("Setter method setFoo in test.PrivateFieldClass annotated with @Column is not public. Only PUBLIC setter methods are supported");
+  }
+
+  @Test public void setterUnsupportedType() {
+    JavaFileObject file =
+        JavaFileObjects.forSourceLines("test.SetterUnsupportedType",
+            "package test;",
+            "",
+            "@"+ ObjectMappable.class.getCanonicalName(),
+            "public class SetterUnsupportedType {",
+            "   @"+ Column.class.getCanonicalName()+"(\"foo\")",
+            "   public void setFoo(java.util.List foo){}",
+            "}"
+        );
+
+    Truth.assertAbout(JavaSourceSubjectFactory.javaSource())
+        .that(file)
+        .processedWith(new ObjectMappableProcessor())
+        .failsToCompile()
+        .withErrorContaining("Unsupported type java.util.List as parameter in method setFoo(java.util.List)() in class test.SetterUnsupportedType annotated with @Column.");
+  }
+
+  @Test public void setterUnsupportedTypeDerivedFromPrivateField() {
+    JavaFileObject file =
+        JavaFileObjects.forSourceLines("test.SetterUnsupportedType",
+            "package test;",
+            "",
+            "@"+ ObjectMappable.class.getCanonicalName(),
+            "public class SetterUnsupportedType {",
+            "   @"+ Column.class.getCanonicalName()+"(\"foo\")",
+            "   private java.util.List foo;",
+
+            "   public void setFoo(java.util.List foo){ this.foo = foo; }",
+            "}"
+        );
+
+    Truth.assertAbout(JavaSourceSubjectFactory.javaSource())
+        .that(file)
+        .processedWith(new ObjectMappableProcessor())
+        .failsToCompile()
+        .withErrorContaining("Unsupported type java.util.List as parameter in method setFoo(java.util.List)() in class test.SetterUnsupportedType annotated with @Column.");
+  }
+
+  @Test public void fieldUnsupportedType() {
+    JavaFileObject file =
+        JavaFileObjects.forSourceLines("test.UnsupportedType",
+            "package test;",
+            "",
+            "@"+ ObjectMappable.class.getCanonicalName(),
+            "public class UnsupportedType {",
+            "   @"+ Column.class.getCanonicalName()+"(\"foo\")",
+            "   java.util.List foo;",
+            "}"
+        );
+
+    Truth.assertAbout(JavaSourceSubjectFactory.javaSource())
+        .that(file)
+        .processedWith(new ObjectMappableProcessor())
+        .failsToCompile()
+        .withErrorContaining("Unsupported type for field foo in class test.UnsupportedType annotated with @Column. Don't know how to read the type java.util.List");
+  }
 }
