@@ -3,6 +3,7 @@ package com.hannesdorfmann.sqlbrite.dao;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.CheckResult;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlCompileable;
@@ -227,7 +228,7 @@ public abstract class Dao {
    * @param contentValues The content values
    * @return An <b>deferred</b> observable with the row Id of the new inserted row
    */
-  protected Observable<Long> insert(final String table, final ContentValues contentValues) {
+  @CheckResult protected Observable<Long> insert(final String table, final ContentValues contentValues) {
     return Observable.defer(new Func0<Observable<Long>>() {
       @Override
       public Observable<Long> call() {
@@ -244,7 +245,7 @@ public abstract class Dao {
    * @param conflictAlgorithm The conflict algorithm
    * @return An <b>deferred</b> observable with the row Id of the new inserted row
    */
-  protected Observable<Long> insert(final String table, final ContentValues contentValues,
+  @CheckResult protected Observable<Long> insert(final String table, final ContentValues contentValues,
       final int conflictAlgorithm) {
     return Observable.defer(new Func0<Observable<Long>>() {
       @Override
@@ -263,7 +264,7 @@ public abstract class Dao {
    * @param whereArgs The where clause arguments
    * @return An <b>deferred</b> observable containing the number of rows that have been changed by this update
    */
-  protected Observable<Integer> update(@NonNull final String table,
+  @CheckResult protected Observable<Integer> update(@NonNull final String table,
       @NonNull final ContentValues values, @Nullable final String whereClause,
       @Nullable final String... whereArgs) {
     return Observable.defer(new Func0<Observable<Integer>>() {
@@ -284,7 +285,7 @@ public abstract class Dao {
    * @param whereArgs The where clause arguments
    * @return An <b>deferred</b> observable containing the number of rows that have been changed by this update
    */
-  protected Observable<Integer> update(@NonNull final String table,
+  @CheckResult protected Observable<Integer> update(@NonNull final String table,
       @NonNull final ContentValues values, final int conflictAlgorithm,
       @Nullable final String whereClause, @Nullable final String... whereArgs) {
     return Observable.defer(new Func0<Observable<Integer>>() {
@@ -301,7 +302,7 @@ public abstract class Dao {
    * @param table The table to delete
    * @return <b>deferred</b> Observable with the number of deleted rows
    */
-  protected Observable<Integer> delete(@NonNull final String table) {
+  @CheckResult protected Observable<Integer> delete(@NonNull final String table) {
     return delete(table, null);
   }
 
@@ -313,7 +314,7 @@ public abstract class Dao {
    * @param whereArgs the where clause arguments
    * @return <b>deferred</b> Observable with the number of deleted rows
    */
-  protected Observable<Integer> delete(@NonNull final String table,
+  @CheckResult protected Observable<Integer> delete(@NonNull final String table,
       @Nullable final String whereClause, @Nullable final String... whereArgs) {
     return Observable.defer(new Func0<Observable<Integer>>() {
       @Override
