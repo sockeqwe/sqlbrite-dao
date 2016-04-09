@@ -102,7 +102,7 @@ afterEvaluate { project ->
   }
 
 
-/*
+
   task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from javadoc
@@ -125,6 +125,6 @@ afterEvaluate { project ->
     archives sourceJar
   }
 
-  */
+
 
 }

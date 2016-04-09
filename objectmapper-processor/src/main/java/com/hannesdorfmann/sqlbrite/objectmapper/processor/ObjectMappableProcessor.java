@@ -147,14 +147,15 @@ import rx.functions.Func1;
       String packageName = getPackageName(clazz);
 
       // Generate the mapper class
-      TypeSpec mapperClass = TypeSpec.classBuilder(clazz.getSimpleClassName() + "Mapper")
+      String mapperClassName = clazz.getSimpleClassName() + "Mapper";
+      TypeSpec mapperClass = TypeSpec.classBuilder(mapperClassName)
           .addJavadoc("Generated class to work with Cursors and ContentValues for $T\n",
               ClassName.get(clazz.getElement()))
           .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
           .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
           .addField(generateRxMappingMethod(clazz))
-          .addMethod(generateContentValuesMethod(clazz, "ContentValuesBuilder"))
-          .addType(generateContentValuesBuilderClass(clazz, "ContentValuesBuilder"))
+          .addMethod(generateContentValuesMethod(clazz, mapperClassName, "ContentValuesBuilder"))
+          .addType(generateContentValuesBuilderClass(clazz, mapperClassName, "ContentValuesBuilder"))
           .build();
 
       JavaFile.builder(packageName, mapperClass).build().writeTo(filer);
@@ -261,11 +262,11 @@ import rx.functions.Func1;
    * Generates the ContentValues Builder Class
    *
    * @param clazz The class you want to create a builder for
-   * @param className The classname
-   * @return The Builder class
+   * @param mapperClassName
+   *@param className The classname  @return The Builder class
    */
   private TypeSpec generateContentValuesBuilderClass(ObjectMappableAnnotatedClass clazz,
-      String className) {
+      String mapperClassName, String className) {
 
     String cvVarName = "contentValues";
 
@@ -282,7 +283,7 @@ import rx.functions.Func1;
         .addField(ContentValues.class, cvVarName, Modifier.PRIVATE)
         .addMethod(constructor)
         .addMethod(MethodSpec.methodBuilder("build")
-            .addJavadoc("Creates and returnes a $T from the builder\n",
+            .addJavadoc("Creates and returns a $T from the builder\n",
                 TypeName.get(ContentValues.class))
             .addJavadoc("@return $T", TypeName.get(ContentValues.class))
             .addModifiers(Modifier.PUBLIC)
@@ -292,7 +293,7 @@ import rx.functions.Func1;
 
     String packageName = getPackageName(clazz);
     for (ColumnAnnotateable e : clazz.getColumnAnnotatedElements()) {
-      e.generateContentValuesBuilderMethod(builder, ClassName.get(packageName, className),
+      e.generateContentValuesBuilderMethod(builder, ClassName.get(packageName, mapperClassName, className),
           cvVarName);
     }
 
@@ -303,9 +304,9 @@ import rx.functions.Func1;
    * Generates a static file to get
    */
   private MethodSpec generateContentValuesMethod(ObjectMappableAnnotatedClass clazz,
-      String className) {
+      String mapperClassName, String className) {
 
-    ClassName typeName = ClassName.get(getPackageName(clazz), className);
+    ClassName typeName = ClassName.get(getPackageName(clazz), mapperClassName, className);
 
     return MethodSpec.methodBuilder("contentValues")
         .addJavadoc("Get a typesafe ContentValues Builder \n")

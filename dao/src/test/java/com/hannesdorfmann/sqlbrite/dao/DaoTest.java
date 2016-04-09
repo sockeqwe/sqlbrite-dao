@@ -4,8 +4,8 @@ import android.content.Context;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
   private UserDao userDao;
 
   @Before public void init() {
-    Context c = Robolectric.getShadowApplication().getApplicationContext();
+    Context c = RuntimeEnvironment.application;
     userDao = new UserDao();
     manager = DaoManager.with(c).databaseName("test.db").version(1).add(userDao).build();
   }

@@ -5,8 +5,8 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(RobolectricTestRunner.class) @Config(manifest = Config.NONE)
@@ -15,7 +15,7 @@ public class DaoManagerBuilderTest {
   Context context;
 
   @Before public void init() {
-    context = Robolectric.getShadowApplication().getApplicationContext();
+    context = RuntimeEnvironment.application;
   }
 
   @Test public void noDatabaseName() throws Exception {

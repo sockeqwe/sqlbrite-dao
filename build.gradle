@@ -5,10 +5,9 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath 'com.android.tools.build:gradle:1.2.3'
+    classpath 'com.android.tools.build:gradle:2.0.0'
 
   //  classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
-    classpath 'org.robolectric:robolectric-gradle-plugin:1.0.1'
   }
 }
 

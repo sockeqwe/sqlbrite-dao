@@ -5,7 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 import com.hannesdorfmann.sqlbrite.dao.Dao;
 import com.hannesdorfmann.sqlbritedao.sample.model.customer.Customer;
 import com.hannesdorfmann.sqlbritedao.sample.model.customer.CustomerMapper;
-import com.hannesdorfmann.sqlbritedao.sample.model.customer.KotlinCustomer;
 import java.util.List;
 import rx.Observable;
 
