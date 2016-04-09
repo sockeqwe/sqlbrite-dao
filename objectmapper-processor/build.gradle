@@ -9,10 +9,10 @@ dependencies {
   compile 'org.apache.commons:commons-lang3:3.4'
 
   compile 'com.google.android:android:4.1.1.4'
-  compile 'io.reactivex:rxjava:1.0.14'
+  compile "io.reactivex:rxjava:$rxJava"
 
-  testCompile 'org.mockito:mockito-all:1.9.5'
-  testCompile 'junit:junit:4.12'
+  testCompile "org.mockito:mockito-all:$mockito"
+  testCompile "junit:junit:$junit"
 
   testCompile 'com.google.truth:truth:1.0-SNAPSHOT'
   testCompile 'com.google.testing.compile:compile-testing:1.0-SNAPSHOT'

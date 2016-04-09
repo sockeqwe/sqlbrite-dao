@@ -3,7 +3,7 @@ package com.hannesdorfmann.sqlbrite.objectmapper.processor;
 import java.util.HashSet;
 import java.util.Set;
 import javax.lang.model.element.Modifier;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**

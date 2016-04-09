@@ -1,0 +1,38 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "net.ltgt.gradle:gradle-apt-plugin:0.6"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: "net.ltgt.apt"
+
+dependencies {
+    compile project(":objectmapper-annotation")
+    apt project(":objectmapper-processor")
+
+    compile 'com.google.android:android:4.1.1.4'
+    compile "io.reactivex:rxjava:$rxJava"
+
+    testCompile "org.mockito:mockito-all:$mockito"
+    testCompile "junit:junit:$junit"
+
+}
+
+
+idea {
+    module {
+        generatedSourceDirs += project.file("build/generated/source/apt")
+        def excludes = project.files(".gradle")
+        excludes += project.buildDir
+        excludes -= "generated"
+        excludeDirs = excludes.toSet()
+    }
+}
+

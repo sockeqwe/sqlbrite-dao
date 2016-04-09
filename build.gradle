@@ -6,8 +6,6 @@ buildscript {
   }
   dependencies {
     classpath 'com.android.tools.build:gradle:2.0.0'
-
-  //  classpath 'com.neenbedankt.gradle.plugins:android-apt:1.4'
   }
 }
 
@@ -35,4 +33,9 @@ ext {
 
   javaSourceCompatibility = JavaVersion.VERSION_1_7
   javaTargetCompatibility = JavaVersion.VERSION_1_7
+
+  junit = '4.12'
+  mockito = '1.9.5'
+  rxJava ='1.1.3'
+
 }

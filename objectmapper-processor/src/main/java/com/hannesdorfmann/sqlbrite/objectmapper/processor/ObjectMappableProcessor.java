@@ -155,7 +155,8 @@ import rx.functions.Func1;
           .addMethod(MethodSpec.constructorBuilder().addModifiers(Modifier.PRIVATE).build())
           .addField(generateRxMappingMethod(clazz))
           .addMethod(generateContentValuesMethod(clazz, mapperClassName, "ContentValuesBuilder"))
-          .addType(generateContentValuesBuilderClass(clazz, mapperClassName, "ContentValuesBuilder"))
+          .addType(
+              generateContentValuesBuilderClass(clazz, mapperClassName, "ContentValuesBuilder"))
           .build();
 
       JavaFile.builder(packageName, mapperClass).build().writeTo(filer);
@@ -199,9 +200,11 @@ import rx.functions.Func1;
       initBlockBuilder.endControlFlow();
     }
 
-    initBlockBuilder.addStatement("return $L", objectVarName).unindent().add(
-        "}\n") // end call () method
-        .unindent().add("}") // end anonymous class
+    initBlockBuilder.addStatement("return $L", objectVarName)
+        .unindent()
+        .add("}\n") // end call () method
+        .unindent()
+        .add("}") // end anonymous class
         .build();
 
     ParameterizedTypeName fieldType =
@@ -262,8 +265,7 @@ import rx.functions.Func1;
    * Generates the ContentValues Builder Class
    *
    * @param clazz The class you want to create a builder for
-   * @param mapperClassName
-   *@param className The classname  @return The Builder class
+   * @param className The classname  @return The Builder class
    */
   private TypeSpec generateContentValuesBuilderClass(ObjectMappableAnnotatedClass clazz,
       String mapperClassName, String className) {
@@ -293,8 +295,8 @@ import rx.functions.Func1;
 
     String packageName = getPackageName(clazz);
     for (ColumnAnnotateable e : clazz.getColumnAnnotatedElements()) {
-      e.generateContentValuesBuilderMethod(builder, ClassName.get(packageName, mapperClassName, className),
-          cvVarName);
+      e.generateContentValuesBuilderMethod(builder,
+          ClassName.get(packageName, mapperClassName, className), cvVarName);
     }
 
     return builder.build();

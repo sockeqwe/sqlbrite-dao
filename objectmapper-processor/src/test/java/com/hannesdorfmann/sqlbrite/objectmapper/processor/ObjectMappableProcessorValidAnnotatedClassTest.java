@@ -63,7 +63,7 @@ public class ObjectMappableProcessorValidAnnotatedClassTest {
 
 
   /**
-   * Tests that fields with min default visibility work as expected
+   * Tests that fields public visibility work as expected
    */
   @Test public void publicFieldVisibility() {
     JavaFileObject file =
@@ -107,5 +107,60 @@ public class ObjectMappableProcessorValidAnnotatedClassTest {
         .compilesWithoutError();
   }
 
+
+  /**
+   * Tests that fields public visibility work as expected
+   */
+  @Test public void publicSetterVisibility() {
+    JavaFileObject file =
+        JavaFileObjects.forSourceLines("test.PublicSetterVisibility",
+            "package test;",
+            "",
+            "@"+ ObjectMappable.class.getCanonicalName(),
+            "public class PublicSetterVisibility {",
+            "   @"+ Column.class.getCanonicalName()+"(\"foo\")",
+            "   private String aString;",
+            "",
+            "   @"+ Column.class.getCanonicalName()+"(\"anInt\")",
+            "   private int anInt;",
+            "",
+            "   @"+ Column.class.getCanonicalName()+"(\"aLong\")",
+            "   private long aLong;",
+            "",
+            "   @"+ Column.class.getCanonicalName()+"(\"aShort\")",
+            "   private short aShort;",
+            "",
+            "   @"+ Column.class.getCanonicalName()+"(\"aFloat\")",
+            "   private float aFloat;",
+            "",
+            "   @"+ Column.class.getCanonicalName()+"(\"aDouble\")",
+            "   private double aDouble;",
+            "",
+            "   @"+ Column.class.getCanonicalName()+"(\"aBoolean\")",
+            "   private boolean aBoolean;",
+            "",
+            "   @"+ Column.class.getCanonicalName()+"(\"bytes\")",
+            "   private byte[] bytes;",
+            "",
+            "   @"+ Column.class.getCanonicalName()+"(\"aDate\")",
+            "   private java.util.Date aDate;",
+            "",
+            "public void setAString(String aString){this.aString = aString; }",
+            "public void setAnInt(int p){this.anInt = p; }",
+            "public void setALong(long p){this.aLong = p; }",
+            "public void setAShort(short p){this.aShort = p; }",
+            "public void setAFloat(float p){this.aFloat = p; }",
+            "public void setADouble(double p){this.aDouble = p; }",
+            "public void setABoolean(boolean p){this.aBoolean = p; }",
+            "public void setBytes(byte[] p){this.bytes = p; }",
+            "public void setADate(java.util.Date p){this.aDate = p; }",
+            "}"
+        );
+
+    Truth.assertAbout(JavaSourceSubjectFactory.javaSource())
+        .that(file)
+        .processedWith(new ObjectMappableProcessor())
+        .compilesWithoutError();
+  }
 
 }

@@ -1,1 +1,1 @@
-include   ':objectmapper-annotation', ':objectmapper-processor', ':sample', ':dao'
+include   ':objectmapper-annotation', ':objectmapper-processor', ':sample', ':dao', ':objectmapper-processor-integration-test'
