@@ -59,4 +59,44 @@ public class ObjectMappableProcessorNotValidAnnotatedClassTest {
         .withErrorContaining("test.InterfaceNotValid is annotated with @ObjectMappable but only classes can be annotated with this annotation");
 
   }
+
+  @Test public void privateField() {
+    JavaFileObject file =
+        JavaFileObjects.forSourceLines("test.PrivateFieldClass",
+            "package test;",
+            "",
+            "@"+ ObjectMappable.class.getCanonicalName(),
+            "public class PrivateFieldClass {",
+            "   @"+ Column.class.getCanonicalName()+"(\"foo\")",
+            "   private String foo;",
+            "}"
+        );
+
+    Truth.assertAbout(JavaSourceSubjectFactory.javaSource())
+        .that(file)
+        .processedWith(new ObjectMappableProcessor())
+        .failsToCompile()
+        .withErrorContaining("The field 'foo' in class PrivateFieldClass is private. A corresponding setter method with the name 'setFoo(java.lang.String)' is expected but haven't been found. Please add this setter method, If you have another setter method named differently please annotate your setter method with @Column");
+
+  }
+
+  @Test public void privateSetter() {
+    JavaFileObject file =
+        JavaFileObjects.forSourceLines("test.PrivateFieldClass",
+            "package test;",
+            "",
+            "@"+ ObjectMappable.class.getCanonicalName(),
+            "public class PrivateFieldClass {",
+            "   @"+ Column.class.getCanonicalName()+"(\"foo\")",
+            "   private String foo;",
+            "   private void setFoo(String foo){ this.foo = foo; }",
+            "}"
+        );
+
+    Truth.assertAbout(JavaSourceSubjectFactory.javaSource())
+        .that(file)
+        .processedWith(new ObjectMappableProcessor())
+        .failsToCompile()
+        .withErrorContaining("Setter method setFoo in test.PrivateFieldClass annotated with @Column is not public. Only PUBLIC setter methods are supported");
+  }
 }
