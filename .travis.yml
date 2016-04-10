@@ -29,7 +29,7 @@ notifications:
 
 sudo: false
 
-script: gradle build --stacktrace
+script: :/gradlew build --stacktrace
 
 cache:
   directories:
