@@ -41,7 +41,6 @@ kapt {
 */
 
 def annotatedAdapter = '1.1.0'
-def supportLib = '23.0.1'
 def mapperVersion = '0.6.0'
 
 dependencies {
@@ -49,15 +48,15 @@ dependencies {
   compile project(':dao')
 
   // Support libs
-  compile 'com.android.support:appcompat-v7:' + supportLib
-  compile 'com.android.support:recyclerview-v7:' + supportLib
-  compile 'com.android.support:cardview-v7:' + supportLib
+  compile "com.android.support:appcompat-v7:$supportLib"
+  compile "com.android.support:recyclerview-v7:$supportLib"
+  compile "com.android.support:cardview-v7:$supportLib"
 
   compile 'com.jakewharton:butterknife:7.0.1'
   //kapt 'com.jakewharton:butterknife:7.0.1'
 
- //apt 'com.hannesdorfmann.sqlbrite:object-mapper:' + mapperVersion
- //compile 'com.hannesdorfmann.sqlbrite:annotations:' + mapperVersion
+  //apt 'com.hannesdorfmann.sqlbrite:object-mapper:' + mapperVersion
+  //compile 'com.hannesdorfmann.sqlbrite:annotations:' + mapperVersion
 
   compile project(':objectmapper-annotation')
   apt project(":objectmapper-processor")

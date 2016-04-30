@@ -34,6 +34,7 @@ ext {
   javaSourceCompatibility = JavaVersion.VERSION_1_7
   javaTargetCompatibility = JavaVersion.VERSION_1_7
 
+  supportLib = '23.3.0'
   junit = '4.12'
   mockito = '1.9.5'
   rxJava ='1.1.3'
