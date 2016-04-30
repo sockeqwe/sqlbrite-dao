@@ -1,43 +1,25 @@
 language: android
-
 android:
   components:
-    - build-tools-23.0.1
-    - extra-android-m2repository
-    - android-23
-#    - android-18
-#    - sys-img-armeabi-v7a-android-18
-#    - sys-img-armeabi-v7a-android-23
-
+  - tools
+  - build-tools-23.0.1
+  - extra-android-m2repository
+  - android-23
 jdk:
-  - oraclejdk7
-
-#after_success:
-#  - .buildscript/deploy_snapshot.sh
-
-#env:
-#  global:
-#    - secure: "NIWC0zkThskXn7uduTJ1yT78voqEgzEfw8tOImGNBjZ/NDU6yxM4bh+tq+fnkn5ENjELV6fgcYd2DUJSWmkFD2k9ZMRNLm//AqlQihl8aT+DpWhDdCkQjnolHnjm1O7+ys7Q/vswBZEzkBxzIgivajZEzvjarQItJjbpBftQ0Cs="
-#    - secure: "ahPT9EzJVpkM4q2HA/VBxUzgicvfdOOZaEvOiQKJofy1FrLjrBS2LFxqCbyffg0sjGUyvBMLg767CSt/0xRRFWIpsjxCfmvEmAURi89zdZ8MUNXIwe7x/0lXCdQIt8eueq3Qh5qFwJUy4aFbzVvcmMXKswWzw1O0+IcvYX00/xc="
-
+- oraclejdk7
+after_success:
+- ".buildscript/deploy_snapshot.sh"
 branches:
   except:
-    - gh-pages
-
+  - gh-pages
 notifications:
   email: false
-
 sudo: false
-
-script: ./gradlew build --stacktrace
-
+script: "./gradlew build --stacktrace"
 cache:
   directories:
-    - $HOME/.gradle
-
-# before_script:
-#  - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
-#  - emulator -avd test -no-skin -no-audio -no-window &
-#  - android-wait-for-emulator
-#  - adb shell input keyevent 82 &
-#
+  - "$HOME/.gradle"
+env:
+  global:
+  - secure: LPWKJCs5GzjD7+5gg7YdOBEjHDSlbeQCBLt1ybtE6Lsvvvq+5cTKwzCZeFxJVQWBULdla2wPNcKvO4AkOFRCFR25IHc0z2Whes0GLSRwO/l11rnUqchg3NLnlVUHMVNPLUEKILTmwho7WEP5OC6R66QM3u4X5IElDh0ABZuJolRjjPjT8AXM8C/YjCUqxryBVotPvo2wcrmN+GhlpAnmkP0lyVHEBYHLaqwwsETZBFaMao6ECxg7UJINWJ20OpmhDTHA35aAknSRByFyN9hZWUlnX2Riwr9DQV4gI+flsmRbHeNR2McTvLSBo0h7+7tswC4pARLdDUMD43nbM9SpIfO0Sk4VQDcuwmsny2jy9/JzDBzvaJ/AOGrZQwCp+cWnrImNLFTMnQBkDc7rCYLzr7Dl57sfcIuWekP7uPFf78E482vV8uGBseyDwezgBv9A8Vi4NbutYDmE3K4x2GIgE+76tVqmPKZ8NNS2b4Z2zOJYF36czh7utt7Rt6o21v9kgcly5Pbn/ZxTm+0TS8GALemg/BVyBrI7wCDNC+jqoVYbhLv+8T2a9S6rzwXsGaoydhqziIQXNnbmsuCcw1OJ2OBfQWxxTy1DszH8F2/opoAPOjv1FCSPrwNYTwGuXX3NVqXDHqVnL0r9lVQa5sMlvlWq6pFOs/w+trbAKMlxpH0=
+  - secure: GB5FJzDgF5Pjo4FyOj005Do3Gition+DZvcr3fQqpP5YSCatwcn8Q0xCfyq6J7ToH2h6/1mbGopI1lbhFHUAJxno1001np7J0ppPwdgJcr30wmdVRrJrSb6m82d3BJZ7B5fCYsGN81pDNngdZG75RXRF1DVDHpcFi7MwMM/0dMz1bFyHw0F9GnlmqJLxcsNA9vy1oBo5oLbfQl+dzmiNCr2gvo51KU1+TExxpZxNA5uHZDypB6uipKrNI4nWDa2DWW8fX9jJLvn37BnTeIfF8LD/S9aho8exH5ZEVuGXNR4lEH2zMzjtY3PMi2gdwxOZE4Pao1fWH8cHj6gGiVFZGz6EWLOEm57WxUy1KZONGlZkNleqQqLB+vrAB2fvUcPYVjs0W4N4gXGBXYDbKs6mS51gTzkQs1Qy/DTR5mgsZwLFsIcVSCf8W3o1Q24Ucyz79Y9vB3UXmZ4TzUzovEevpfQCLT9caWu6lHCvI/TAsNL0lWenNxRIq75GUJbjSajvQ1zovcLKFtK3IYH6n0n0sc3nGRhKfQFrcc4WdHF2kbAvvqrJYy/3BuQB5cMaPiZtamSBjkVdLVNLmDIKGgYBMqml0B3gxgEOBjBe2FTpCnPyUQOxQUI/xeYElf6aBlhba7/aqjX2P08VS/el4MCM9UgHJTFsMDlhzvOELT2j+WI=
