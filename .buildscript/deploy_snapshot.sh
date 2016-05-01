@@ -7,7 +7,7 @@
 
 SLUG="sockeqwe/sqlbrite-dao"
 JDK="oraclejdk7"
-BRANCH="develop"
+BRANCH="master"
 
 set -e
 
