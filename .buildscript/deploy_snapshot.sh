@@ -6,7 +6,7 @@
 # http://benlimmer.com/2013/12/26/automatically-publish-javadoc-to-gh-pages-with-travis-ci/
 
 SLUG="sockeqwe/sqlbrite-dao"
-JDK="oraclejdk8"
+JDK="oraclejdk7"
 BRANCH="develop"
 
 set -e
