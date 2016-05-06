@@ -138,7 +138,7 @@ ObjectMapper is supported by Kotlin (use `kapt` instead of `apt` for annotation 
 
 Unfortunately, data classes are not supported yet.
 
-## Auto-Value
+### Auto-Value
 The provided Object Mapper does not support Auto-Value. However, there is a nice library called [auto-value-cursor](https://github.com/gabrielittner/auto-value-cursor) that can be used instead of the build in Object Mapper and with the DAO module to achieve the same, just with auto-value.
 
 ## DAO
